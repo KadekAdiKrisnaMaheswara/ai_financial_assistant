@@ -1,0 +1,39 @@
+# dependencies
+node_modules/
+.history
+
+# env
+.env
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# build
+dist/
+build/
+
+# vscode
+.vscode/
+
+# macOS
+.DS_Store
+
+# prisma
+prisma/dev.db
+
+# coverage
+coverage/
+
+# generated
+generated/
+
+# cache
+.cache/
+
+# vite
+.vite/
+
+# package lock optional
+package-lock.json
