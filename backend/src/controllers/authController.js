@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body
+    const { full_name, email, password } = req.body
 
     const existingUser = await prisma.user.findUnique({
       where: { email }
@@ -20,26 +20,33 @@ export const register = async (req, res) => {
 
     const user = await prisma.user.create({
       data: {
-        name,
+        full_name,
         email,
-        password: hashedPassword
+        password_hash: hashedPassword
       }
     })
 
     res.status(201).json({
       message: 'Register success',
-      user
+      user: {
+        id: user.id,
+        full_name: user.full_name,
+        email: user.email
+      }
     })
 
   } catch (error) {
+
     res.status(500).json({
       message: error.message
     })
+
   }
 }
 
 export const login = async (req, res) => {
   try {
+
     const { email, password } = req.body
 
     const user = await prisma.user.findUnique({
@@ -52,7 +59,10 @@ export const login = async (req, res) => {
       })
     }
 
-    const isMatch = await bcrypt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password_hash
+    )
 
     if (!isMatch) {
       return res.status(400).json({
@@ -62,19 +72,25 @@ export const login = async (req, res) => {
 
     const token = jwt.sign(
       { id: user.id },
-      'secretkey',
+      process.env.JWT_SECRET,
       { expiresIn: '1d' }
     )
 
-    res.json({
+    res.status(200).json({
       message: 'Login success',
       token,
-      user
+      user: {
+        id: user.id,
+        full_name: user.full_name,
+        email: user.email
+      }
     })
 
   } catch (error) {
+
     res.status(500).json({
       message: error.message
     })
+
   }
 }
