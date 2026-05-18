@@ -329,3 +329,89 @@
     overflow-x: auto;
   }
 }
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-btn,
+.delete-btn {
+  border: none;
+  outline: none;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.edit-btn {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.edit-btn:hover {
+  background: #bfdbfe;
+}
+
+.delete-btn {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.delete-btn:hover {
+  background: #fecaca;
+}
+
+.form-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.cancel-edit-btn {
+  border: none;
+  background: #eef1f8;
+  color: #374151;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.transactions-table-card th {
+  text-align: center;
+}
+
+.transactions-table-card td {
+  text-align: center;
+}
+
+.transactions-table-card th:first-child,
+.transactions-table-card td:first-child {
+  text-align: left;
+}
+
+.transaction-icon-income {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.transaction-icon-expense {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.amount-income {
+  color: #16a34a !important;
+  font-weight: 700;
+}
+
+.amount-expense {
+  color: #dc2626 !important;
+  font-weight: 700;
+}

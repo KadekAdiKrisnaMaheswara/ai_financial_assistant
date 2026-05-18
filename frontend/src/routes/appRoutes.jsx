@@ -9,6 +9,8 @@ import Transactions from '../pages/transactions/Transactions'
 import Portfolio from '../pages/transactions/Transactions'
 import Analytics from '../pages/analytics/Analytics'
 import AIAssistant from '../pages/ai-assistant/AIAssistant'
+import Budgets from '../pages/budgets/Budgets'
+import Goals from '../pages/goals/Goals'
 
 function AppRoutes() {
   return (
@@ -23,6 +25,8 @@ function AppRoutes() {
       <Route path='/portfolio' element={<Portfolio />} />
       <Route path='/analytics' element={<Analytics />} />
       <Route path='/ai-assistant' element={<AIAssistant />} />
+      <Route path='/budgets' element={<Budgets />} />
+      <Route path='/goals' element={<Goals />} />
     </Routes>
   )
 }

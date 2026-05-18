@@ -1,22 +1,27 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import MainLayout from '../../components/layout/MainLayout'
 import api from '../../api/axios'
-import './transactions.css'
+import './Transactions.css'
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState([])
   const [categories, setCategories] = useState([])
   const [activeFilter, setActiveFilter] = useState('all')
   const [activePanel, setActivePanel] = useState(null)
+  const [editingId, setEditingId] = useState(null)
+  const [goals, setGoals] = useState([])
 
-  const [form, setForm] = useState({
+  const defaultForm = {
     description: '',
     type: 'expense',
     amount: '',
+    goal_id: '',
     category_id: '',
     transaction_date: new Date().toISOString().split('T')[0],
     notes: '',
-  })
+  }
+
+  const [form, setForm] = useState(defaultForm)
 
   const [categoryForm, setCategoryForm] = useState({
     name: '',
@@ -49,12 +54,22 @@ export default function Transactions() {
     }
   }, [token])
 
+  const fetchGoals = useCallback(async () => {
+  try {
+    const response = await api.get('/goals', authHeader)
+    setGoals(response.data)
+  } catch (error) {
+    console.log(error)
+  }
+}, [token])
+
   useEffect(() => {
     if (token) {
       fetchTransactions()
       fetchCategories()
+      fetchGoals()
     }
-  }, [fetchTransactions, fetchCategories, token])
+  }, [fetchTransactions, fetchCategories, fetchGoals, token])
 
   const filteredCategories = categories.filter(
     (category) => category.type === form.type
@@ -75,19 +90,47 @@ export default function Transactions() {
   }, [transactions])
 
   const handleChange = (e) => {
+    const { name, value } = e.target
+
+if (name === 'goal_id') {
+  const savingsCategory = categories.find(
+    (category) =>
+      category.name.toLowerCase() === 'savings' &&
+      category.type === 'expense'
+  )
+
+  if (value && !savingsCategory) {
+    alert('Category Savings belum tersedia. Jalankan seed atau buat category Savings terlebih dahulu.')
+    return
+  }
+
+  setForm({
+    ...form,
+    goal_id: value,
+    type: value ? 'expense' : form.type,
+    category_id: value && savingsCategory ? savingsCategory.id : '',
+  })
+
+  return
+}
+  
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [name]: value,
     })
   }
 
-  const handleTypeChange = (e) => {
-    setForm({
-      ...form,
-      type: e.target.value,
-      category_id: '',
-    })
+const handleTypeChange = (e) => {
+  if (form.goal_id) {
+    return
   }
+
+  setForm({
+    ...form,
+    type: e.target.value,
+    category_id: '',
+  })
+}
 
   const handleCategoryChange = (e) => {
     setCategoryForm({
@@ -99,36 +142,77 @@ export default function Transactions() {
   const handleSubmitTransaction = async (e) => {
     e.preventDefault()
 
+    const payload = {
+      category_id: form.category_id,
+      amount: Number(form.amount),
+      type: form.type,
+      description: form.description,
+      goal_id: form.goal_id || null,
+      transaction_date: form.transaction_date,
+      notes: form.notes,
+    }
+
     try {
-      await api.post(
-        '/transactions',
-        {
-          category_id: form.category_id,
-          amount: Number(form.amount),
-          type: form.type,
-          description: form.description,
-          transaction_date: form.transaction_date,
-          notes: form.notes,
-        },
-        authHeader
-      )
+      if (editingId) {
+        await api.put(`/transactions/${editingId}`, payload, authHeader)
+        alert('Transaksi berhasil diupdate')
+      } else {
+        await api.post('/transactions', payload, authHeader)
+        alert('Transaksi berhasil ditambahkan')
+      }
 
-      alert('Transaksi berhasil ditambahkan')
-
-      setForm({
-        description: '',
-        type: 'expense',
-        amount: '',
-        category_id: '',
-        transaction_date: new Date().toISOString().split('T')[0],
-        notes: '',
-      })
-
+      setForm(defaultForm)
+      setEditingId(null)
       setActivePanel(null)
       fetchTransactions()
     } catch (error) {
       console.log(error)
-      alert(error.response?.data?.message || 'Gagal menambahkan transaksi')
+      alert(error.response?.data?.message || 'Gagal menyimpan transaksi')
+    }
+  }
+
+  const handleEditTransaction = (item) => {
+    setEditingId(item.id)
+    setActivePanel('transaction')
+
+    setForm({
+      description: item.description || '',
+      type: item.type,
+      amount: String(item.amount),
+      goal_id: item.goal_id || '',
+      category_id: item.category_id,
+      transaction_date: item.transaction_date
+        ? new Date(item.transaction_date).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
+      notes: item.notes || '',
+    })
+    window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  })
+  }
+
+  const handleCancelEdit = () => {
+    setEditingId(null)
+    setActivePanel(null)
+    setForm(defaultForm)
+  }
+
+  const handleDeleteTransaction = async (id) => {
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete this transaction?'
+    )
+
+    if (!confirmDelete) return
+
+    try {
+      await api.delete(`/transactions/${id}`, authHeader)
+
+      alert('Transaksi berhasil dihapus')
+      fetchTransactions()
+    } catch (error) {
+      console.log(error)
+      alert(error.response?.data?.message || 'Gagal menghapus transaksi')
     }
   }
 
@@ -165,18 +249,23 @@ export default function Transactions() {
           <div className="transactions-actions">
             <button
               className="secondary-action"
-              onClick={() =>
+              onClick={() => {
+                setEditingId(null)
                 setActivePanel(activePanel === 'category' ? null : 'category')
-              }
+              }}
             >
               + Create Category
             </button>
 
             <button
               className="primary-action"
-              onClick={() =>
-                setActivePanel(activePanel === 'transaction' ? null : 'transaction')
-              }
+              onClick={() => {
+                setEditingId(null)
+                setForm(defaultForm)
+                setActivePanel(
+                  activePanel === 'transaction' ? null : 'transaction'
+                )
+              }}
             >
               + Add Transaction
             </button>
@@ -185,7 +274,19 @@ export default function Transactions() {
 
         {activePanel === 'transaction' && (
           <form className="floating-form-card" onSubmit={handleSubmitTransaction}>
-            <h2>Add Transaction</h2>
+            <div className="form-title-row">
+              <h2>{editingId ? 'Edit Transaction' : 'Add Transaction'}</h2>
+
+              {editingId && (
+                <button
+                  type="button"
+                  className="cancel-edit-btn"
+                  onClick={handleCancelEdit}
+                >
+                  Cancel Edit
+                </button>
+              )}
+            </div>
 
             <div className="form-grid">
               <div>
@@ -202,7 +303,7 @@ export default function Transactions() {
 
               <div>
                 <label>Type</label>
-                <select name="type" value={form.type} onChange={handleTypeChange}>
+                <select name="type" value={form.type} onChange={handleTypeChange} disabled={!!form.goal_id}>
                   <option value="income">Income / Pemasukan</option>
                   <option value="expense">Expense / Pengeluaran</option>
                 </select>
@@ -220,22 +321,53 @@ export default function Transactions() {
                 />
               </div>
 
+{!form.goal_id && (
+  <div>
+    <label>Category</label>
+    <select
+      name="category_id"
+      value={form.category_id}
+      onChange={handleChange}
+      required
+    >
+      <option value="">Select category</option>
+
+      {filteredCategories.map((category) => (
+        <option key={category.id} value={category.id}>
+          {category.name}
+        </option>
+      ))}
+    </select>
+  </div>
+)}
+
+{form.goal_id && (
+  <div>
+    <label>Category</label>
+    <input
+      type="text"
+      value="Savings"
+      disabled
+    />
+  </div>
+)}
+
               <div>
-                <label>Category</label>
-                <select
-                  name="category_id"
-                  value={form.category_id}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select category</option>
-                  {filteredCategories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+  <label>Allocate to Goal</label>
+  <select
+    name="goal_id"
+    value={form.goal_id}
+    onChange={handleChange}
+  >
+    <option value="">No Goal</option>
+
+    {goals.map((goal) => (
+      <option key={goal.id} value={goal.id}>
+        {goal.name}
+      </option>
+    ))}
+  </select>
+</div>
 
               <div>
                 <label>Date</label>
@@ -261,7 +393,7 @@ export default function Transactions() {
             </div>
 
             <button type="submit" className="submit-action">
-              Save Transaction
+              {editingId ? 'Update Transaction' : 'Save Transaction'}
             </button>
           </form>
         )}
@@ -329,7 +461,7 @@ export default function Transactions() {
           <div className="summary-card">
             <span>Monthly Outflow</span>
             <h2>Rp {monthlyOutflow.toLocaleString('id-ID')}</h2>
-            <p>↗ 4.2% vs last month</p>
+            <p>Based on recorded expenses</p>
           </div>
         </div>
 
@@ -342,13 +474,14 @@ export default function Transactions() {
                 <th>Date</th>
                 <th>Amount</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
 
             <tbody>
               {filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="empty-row">
+                  <td colSpan="6" className="empty-row">
                     No transactions yet.
                   </td>
                 </tr>
@@ -357,8 +490,14 @@ export default function Transactions() {
                   <tr key={item.id}>
                     <td>
                       <div className="transaction-name">
-                        <div className="transaction-icon">
-                          {item.type === 'income' ? '↗' : '↘'}
+                        <div 
+  className={`transaction-icon ${
+    item.type === 'income'
+      ? 'transaction-icon-income'
+      : 'transaction-icon-expense'
+  }`}
+>
+  {item.type === 'income' ? '↗' : '↘'}
                         </div>
 
                         <div>
@@ -402,6 +541,24 @@ export default function Transactions() {
                       <span className="status-dot"></span>
                       Completed
                     </td>
+
+                    <td>
+                      <div className="table-actions">
+                        <button
+                          className="edit-btn"
+                          onClick={() => handleEditTransaction(item)}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="delete-btn"
+                          onClick={() => handleDeleteTransaction(item.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}
@@ -413,14 +570,6 @@ export default function Transactions() {
               Showing {filteredTransactions.length} of {transactions.length}{' '}
               transactions
             </span>
-
-            <div className="pagination">
-              <button>‹</button>
-              <button className="active">1</button>
-              <button>2</button>
-              <button>3</button>
-              <button>›</button>
-            </div>
           </div>
         </div>
       </div>

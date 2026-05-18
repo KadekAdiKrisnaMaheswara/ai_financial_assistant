@@ -251,3 +251,119 @@
   align-items: center;
   gap: 14px;
 }
+
+.notification-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aivest-notif-dropdown {
+  position: absolute;
+  top: 52px;
+  right: -18px;
+  width: 310px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.16);
+  z-index: 9999;
+}
+
+.aivest-notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.aivest-notif-header h4 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.aivest-notif-header span {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aivest-notif-card {
+  width: 100%;
+  border-radius: 14px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #eef0f5;
+  margin-bottom: 10px;
+}
+
+.aivest-notif-card.danger {
+  background: #fff7f7;
+  border-color: #fecaca;
+}
+
+.aivest-notif-card.warning {
+  background: #fffdf5;
+  border-color: #fde68a;
+}
+
+.aivest-notif-card h5 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 5px;
+  line-height: 1.35;
+}
+
+.aivest-notif-card p {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.aivest-notif-card.danger h5 {
+  color: #dc2626;
+}
+
+.aivest-notif-card.warning h5 {
+  color: #d97706;
+}
+
+.aivest-notif-empty {
+  padding: 18px 0;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+}

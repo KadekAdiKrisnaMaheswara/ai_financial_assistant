@@ -24,6 +24,7 @@ app.use('/api/transactions', transactionRoutes)
 app.use('/api/budgets', budgetRoutes)
 app.use('/api/goals', goalRoutes)
 app.use('/api/notifications', notificationRoutes)
+app.use('/api/budgets', budgetRoutes)
 app.use('/api/ai', aiRoutes)
 
 // TEST API

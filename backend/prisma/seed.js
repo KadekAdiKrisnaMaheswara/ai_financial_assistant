@@ -32,7 +32,14 @@ async function main() {
         color: "#F59E0B",
         type: "expense",
         is_default: true
-      }
+      },
+      {
+  name: "Savings",
+  icon: "piggy-bank",
+  color: "#2563EB",
+  type: "expense",
+  is_default: true
+}
     ],
     skipDuplicates: true
   })

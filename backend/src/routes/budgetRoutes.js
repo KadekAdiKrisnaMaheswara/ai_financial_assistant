@@ -1,112 +1,128 @@
 import express from 'express'
 import prisma from '../prisma/client.js'
+import authMiddleware from '../middlewares/authMiddleware.js'
 
 const router = express.Router()
 
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const budgets = await prisma.budget.findMany({
+      where: {
+        user_id: req.userId,
+      },
       include: {
         category: true,
-        user: true
-      }
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
     })
 
     res.json(budgets)
   } catch (error) {
-    res.status(500).json({
-      message: 'Gagal mengambil budget',
-      error: error.message
-    })
+    console.log(error)
+    res.status(500).json({ message: 'Gagal mengambil budget' })
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const {
-      user_id,
       category_id,
       limit_amount,
       period,
       start_date,
-      end_date
+      end_date,
     } = req.body
 
     const budget = await prisma.budget.create({
       data: {
-        user_id,
+        user_id: req.userId,
         category_id,
-        limit_amount: Number(limit_amount),
+        limit_amount,
         period,
         start_date: new Date(start_date),
-        end_date: new Date(end_date)
-      }
+        end_date: new Date(end_date),
+      },
+      include: {
+        category: true,
+      },
     })
 
-    res.json(budget)
+    res.status(201).json(budget)
   } catch (error) {
-    res.status(500).json({
-      message: 'Gagal membuat budget',
-      error: error.message
-    })
+    console.log(error)
+    res.status(500).json({ message: 'Gagal membuat budget' })
   }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params
+
+    const existingBudget = await prisma.budget.findFirst({
+      where: {
+        id,
+        user_id: req.userId,
+      },
+    })
+
+    if (!existingBudget) {
+      return res.status(404).json({ message: 'Budget tidak ditemukan' })
+    }
 
     const {
       category_id,
       limit_amount,
-      spent_amount,
       period,
       start_date,
-      end_date
+      end_date,
     } = req.body
-
-    const data = {}
-
-    if (category_id !== undefined) data.category_id = category_id
-    if (limit_amount !== undefined) data.limit_amount = Number(limit_amount)
-    if (spent_amount !== undefined) data.spent_amount = Number(spent_amount)
-    if (period !== undefined) data.period = period
-    if (start_date !== undefined) data.start_date = new Date(start_date)
-    if (end_date !== undefined) data.end_date = new Date(end_date)
 
     const budget = await prisma.budget.update({
       where: { id },
-      data
+      data: {
+        category_id,
+        limit_amount,
+        period,
+        start_date: new Date(start_date),
+        end_date: new Date(end_date),
+      },
+      include: {
+        category: true,
+      },
     })
 
-    res.json({
-      message: 'Budget berhasil diupdate',
-      budget
-    })
+    res.json(budget)
   } catch (error) {
-    res.status(500).json({
-      message: 'Gagal update budget',
-      error: error.message
-    })
+    console.log(error)
+    res.status(500).json({ message: 'Gagal update budget' })
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params
 
-    await prisma.budget.delete({
-      where: { id }
+    const existingBudget = await prisma.budget.findFirst({
+      where: {
+        id,
+        user_id: req.userId,
+      },
     })
 
-    res.json({
-      message: 'Budget berhasil dihapus'
+    if (!existingBudget) {
+      return res.status(404).json({ message: 'Budget tidak ditemukan' })
+    }
+
+    await prisma.budget.delete({
+      where: { id },
     })
+
+    res.json({ message: 'Budget berhasil dihapus' })
   } catch (error) {
-    res.status(500).json({
-      message: 'Gagal hapus budget',
-      error: error.message
-    })
+    console.log(error)
+    res.status(500).json({ message: 'Gagal hapus budget' })
   }
 })
 

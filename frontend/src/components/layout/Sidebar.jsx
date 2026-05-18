@@ -8,6 +8,8 @@ function Sidebar() {
   const menus = [
     { title: 'Dashboard', icon: ICONS.dashboard, path: '/dashboard' },
     { title: 'Transactions', icon: ICONS.transaction, path: '/transactions' },
+    { title: 'Budgets', icon: ICONS.budgets, path: '/budgets' },
+    { title: 'Goals', icon: ICONS.goal, path: '/goals' },
     { title: 'Analytics', icon: ICONS.analytics, path: '/analytics' },
     { title: 'AI Assistant', icon: ICONS.ai, path: '/ai-assistant' },
   ]

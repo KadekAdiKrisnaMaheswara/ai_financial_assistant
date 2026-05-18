@@ -11,7 +11,8 @@ router.get('/', authMiddleware, async (req, res) => {
         user_id: req.userId
       },
       include: {
-        category: true
+        category: true,
+        goal: true
       },
       orderBy: {
         created_at: 'desc'
@@ -21,9 +22,7 @@ router.get('/', authMiddleware, async (req, res) => {
     res.json(transactions)
   } catch (error) {
     console.log(error)
-    res.status(500).json({
-      message: 'Gagal mengambil transaction'
-    })
+    res.status(500).json({ message: 'Gagal mengambil transaction' })
   }
 })
 
@@ -31,6 +30,7 @@ router.post('/', authMiddleware, async (req, res) => {
   try {
     const {
       category_id,
+      goal_id,
       amount,
       type,
       description,
@@ -42,6 +42,7 @@ router.post('/', authMiddleware, async (req, res) => {
       data: {
         user_id: req.userId,
         category_id,
+        goal_id: goal_id || null,
         amount,
         type,
         description,
@@ -56,15 +57,26 @@ router.post('/', authMiddleware, async (req, res) => {
     res.status(201).json(transaction)
   } catch (error) {
     console.log(error)
-    res.status(500).json({
-      message: 'Gagal membuat transaction'
-    })
+    res.status(500).json({ message: 'Gagal membuat transaction' })
   }
 })
 
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params
+
+    const existingTransaction = await prisma.transaction.findFirst({
+      where: {
+        id,
+        user_id: req.userId
+      }
+    })
+
+    if (!existingTransaction) {
+      return res.status(404).json({
+        message: 'Transaction tidak ditemukan'
+      })
+    }
 
     const {
       category_id,
@@ -76,10 +88,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
     } = req.body
 
     const transaction = await prisma.transaction.update({
-      where: {
-        id,
-        user_id: req.userId
-      },
+      where: { id },
       data: {
         category_id,
         amount,
@@ -98,9 +107,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
     res.json(transaction)
   } catch (error) {
     console.log(error)
-    res.status(500).json({
-      message: 'Gagal update transaction'
-    })
+    res.status(500).json({ message: 'Gagal update transaction' })
   }
 })
 
@@ -108,20 +115,27 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params
 
-    await prisma.transaction.delete({
+    const existingTransaction = await prisma.transaction.findFirst({
       where: {
-        id
+        id,
+        user_id: req.userId
       }
     })
 
-    res.json({
-      message: 'Transaction berhasil dihapus'
+    if (!existingTransaction) {
+      return res.status(404).json({
+        message: 'Transaction tidak ditemukan'
+      })
+    }
+
+    await prisma.transaction.delete({
+      where: { id }
     })
+
+    res.json({ message: 'Transaction berhasil dihapus' })
   } catch (error) {
     console.log(error)
-    res.status(500).json({
-      message: 'Gagal hapus transaction'
-    })
+    res.status(500).json({ message: 'Gagal hapus transaction' })
   }
 })
 
