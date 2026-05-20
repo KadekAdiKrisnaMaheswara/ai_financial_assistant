@@ -1,5 +1,5 @@
 .dashboard {
-  padding: 32px;
+  padding: 32px 48px;
   background: #f5f7fb;
   min-height: 100vh;
   color: #0f172a;
@@ -277,7 +277,7 @@
   font-weight: 800;
 }
 
-/* MAIN GRID 2x2 */
+/* MAIN GRID */
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
@@ -320,11 +320,9 @@
   grid-area: status;
   padding: 28px;
   min-height: 260px;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
   position: relative;
   overflow: hidden;
 }
@@ -332,12 +330,10 @@
 .status-bottom {
   padding-top: 18px;
   border-top: 1px solid #edf1f7;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-
   color: #64748b;
   font-size: 13px;
 }
@@ -490,39 +486,79 @@
   font-size: 13px;
 }
 
-/* SUMMARY */
+/* SUMMARY - FIX BAGIAN INI */
 .dashboard-summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
+  align-items: stretch;
+
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  padding-left: 48px;
+  padding-right: 48px;
+}
+
+.dashboard-summary-grid > * {
+  min-width: 0;
 }
 
 .dashboard-mini-card {
-  padding: 28px;
-  min-height: 520px;
+  min-width: 0;
+  width: 100%;
+  min-height: 300px;
+  padding: 24px;
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dashboard-mini-card .card-header {
+  margin-bottom: 22px;
+}
+
+.dashboard-mini-card .card-header h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 6px;
+  letter-spacing: -0.6px;
+}
+
+.dashboard-mini-card .card-header p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
 }
 
 .dashboard-mini-list,
 .dashboard-transaction-list {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
 .dashboard-mini-item,
 .dashboard-transaction-item {
-  padding: 20px;
-  border-radius: 20px;
+  min-height: 105px;
+  padding: 18px;
+  border-radius: 18px;
   background: #f8fafc;
   border: 1px solid #edf1f7;
-  min-height: 120px;
+  min-width: 0;
 }
 
 .dashboard-mini-top {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   gap: 14px;
+  min-width: 0;
 }
 
 .dashboard-mini-top h4,
@@ -530,12 +566,14 @@
   font-size: 15px;
   font-weight: 700;
   margin-bottom: 6px;
+  min-width: 0;
 }
 
 .dashboard-mini-top p,
 .dashboard-transaction-item p {
   font-size: 13px;
   color: #64748b;
+  margin: 0;
 }
 
 .dashboard-progress-track {
@@ -570,10 +608,68 @@
   gap: 18px;
 }
 
+.dashboard-transaction-item > div {
+  min-width: 0;
+}
+
+.dashboard-transaction-item h4 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-transaction-item strong {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .dashboard-empty {
-  padding: 40px 0;
+  flex: 1;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   color: #94a3b8;
+  font-size: 14px;
+  background: #f8fafc;
+  border: 1px dashed #dbe3f0;
+  border-radius: 18px;
+}
+
+.empty-card-state {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.empty-card-state h3 {
+  font-size: 18px;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.empty-card-state p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.empty-summary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 15px;
+  font-weight: 500;
+  border: 1px dashed #dbe3f0;
+  border-radius: 18px;
+  background: #f8fafc;
 }
 
 /* RESPONSIVE */
@@ -583,7 +679,7 @@
   }
 
   .dashboard-summary-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -595,6 +691,12 @@
       "ai"
       "recommendation"
       "status";
+  }
+
+  .dashboard-summary-grid {
+    grid-template-columns: 1fr;
+    padding-left: 48px;
+    padding-right: 48px;
   }
 }
 
@@ -627,5 +729,11 @@
 
   .stat-value-row h2 {
     font-size: 28px;
+  }
+
+  .dashboard-summary-grid {
+    grid-template-columns: 1fr;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }

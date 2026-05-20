@@ -165,7 +165,14 @@ function Dashboard() {
     })
   }, [goals, transactions])
 
+  const hasFinancialData =
+  transactions.length > 0 ||
+  budgets.length > 0 ||
+  goals.length > 0
+
   const financialHealthScore = useMemo(() => {
+    if (!hasFinancialData) return 0
+
     let score = 100
 
     if (totalExpenses > totalIncome) {
@@ -195,7 +202,7 @@ function Dashboard() {
     score += progressingGoals * 5
 
     return Math.max(0, Math.min(100, Math.round(score)))
-  }, [totalIncome, totalExpenses, totalBalance, budgetSummary, goalSummary])
+  }, [hasFinancialData, totalIncome, totalExpenses, totalBalance, budgetSummary, goalSummary])
 
   const aiInsights = useMemo(() => {
     const insights = []
@@ -263,6 +270,8 @@ function Dashboard() {
   }, [transactions, totalIncome, totalExpenses, budgetSummary])
 
   const smartRecommendations = useMemo(() => {
+    if (!hasFinancialData) return []
+
     const recommendations = []
 
     const overBudget = budgetSummary.filter(
@@ -309,7 +318,7 @@ function Dashboard() {
     }
 
     return recommendations.slice(0, 4)
-  }, [budgetSummary, goalSummary, totalIncome, totalBalance])
+  }, [hasFinancialData, budgetSummary, goalSummary, totalIncome, totalBalance])
 
   return (
     <MainLayout>
@@ -578,22 +587,32 @@ function Dashboard() {
             </div>
 
 <div className="card market-card">
-  <div className="status-top">
-    <h4>Financial Status</h4>
+  {hasFinancialData ? (
+    <>
+      <div className="status-top">
+        <h4>Financial Status</h4>
 
-    <div className="status-main">
-      <h3>{totalBalance >= 0 ? 'STABLE' : 'NEEDS REVIEW'}</h3>
+        <div className="status-main">
+          <h3>{totalBalance >= 0 ? 'STABLE' : 'NEEDS REVIEW'}</h3>
 
-      <span className={totalBalance >= 0 ? 'status-badge healthy' : 'status-badge review'}>
-        {totalBalance >= 0 ? 'Healthy' : 'Review'}
-      </span>
+          <span className={totalBalance >= 0 ? 'status-badge healthy' : 'status-badge review'}>
+            {totalBalance >= 0 ? 'Healthy' : 'Review'}
+          </span>
+        </div>
+      </div>
+
+      <div className="status-bottom">
+        <span>Transactions analyzed</span>
+        <strong>{transactions.length}</strong>
+      </div>
+    </>
+  ) : (
+    <div className="empty-card-state">
+      <h3>No Financial Data</h3>
+      <p>Add transactions to generate financial status.</p>
     </div>
-  </div>
-
-  <div className="status-bottom">
-    <span>Transactions analyzed</span>
-    <strong>{transactions.length}</strong>
-  </div>
+  )}
+</div>
 </div>
           </div>
         </div>
@@ -716,7 +735,6 @@ function Dashboard() {
                 ))}
               </div>
             )}
-          </div>
         </div>
       </div>
     </MainLayout>
