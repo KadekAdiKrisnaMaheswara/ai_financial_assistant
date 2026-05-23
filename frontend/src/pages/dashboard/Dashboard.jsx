@@ -22,20 +22,22 @@ function Dashboard() {
 
   const token = localStorage.getItem('token')
 
-  const authHeader = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-
-  const fetchTransactions = useCallback(async () => {
-    try {
-      const response = await api.get('/transactions', authHeader)
-      setTransactions(response.data)
-    } catch (error) {
-      console.log(error)
+  const authHeader = useMemo(() => {
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   }, [token])
+
+const fetchTransactions = useCallback(async () => {
+  try {
+    const response = await api.get('/transactions', authHeader)
+    setTransactions(response.data)
+  } catch (error) {
+    console.log(error)
+  }
+}, [authHeader])
 
   const fetchGoals = useCallback(async () => {
     try {
@@ -44,7 +46,7 @@ function Dashboard() {
     } catch (error) {
       console.log(error)
     }
-  }, [token])
+  }, [authHeader])
 
   const fetchBudgets = useCallback(async () => {
     try {
@@ -53,7 +55,7 @@ function Dashboard() {
     } catch (error) {
       console.log(error)
     }
-  }, [token])
+  }, [authHeader])
 
   useEffect(() => {
     if (token) {

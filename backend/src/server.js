@@ -9,6 +9,7 @@ import budgetRoutes from './routes/budgetRoutes.js'
 import goalRoutes from './routes/goalRoutes.js'
 import notificationRoutes from './routes/notificationRoutes.js'
 import aiRoutes from './routes/aiRoutes.js'
+import receiptRoutes from './routes/receiptRoutes.js'
 
 dotenv.config()
 
@@ -26,6 +27,7 @@ app.use('/api/goals', goalRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/budgets', budgetRoutes)
 app.use('/api/ai', aiRoutes)
+app.use('/api/receipts', receiptRoutes)
 
 // TEST API
 app.get('/', (req, res) => {

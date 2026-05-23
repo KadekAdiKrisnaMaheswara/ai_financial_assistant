@@ -1,5 +1,10 @@
+/* =========================================================
+   DASHBOARD PAGE WRAPPER
+   Mengatur area utama halaman dashboard
+========================================================= */
 .dashboard {
   padding: 32px 48px;
+  margin-bottom: -30px;
   background: #f5f7fb;
   min-height: 100vh;
   color: #0f172a;
@@ -9,6 +14,10 @@
   box-sizing: border-box;
 }
 
+/* =========================================================
+   GLOBAL CARD STYLE
+   Style dasar untuk semua card dashboard
+========================================================= */
 .card {
   background: #ffffff;
   border: 1px solid #edf1f7;
@@ -24,7 +33,10 @@
   color: #ef4444;
 }
 
-/* HEADER */
+/* =========================================================
+   HEADER DASHBOARD
+   Bagian judul, deskripsi, filter realtime, dan tombol export
+========================================================= */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
@@ -51,27 +63,50 @@
   gap: 14px;
 }
 
+/* Badge Realtime Financial Analytics */
 .filter-buttons {
-  padding: 12px 18px;
-  background: #eef4ff;
-  border-radius: 14px;
+  min-height: 48px;
+  margin-bottom: -20px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #eef4ff, #ffffff);
+  border: 1px solid #dbeafe;
   color: #2563eb;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.08);
 }
 
+.filter-buttons span::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  margin-right: 9px;
+  display: inline-block;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
+}
+
+/* Tombol export report */
 .export-report-btn {
   border: none;
   height: 48px;
   padding: 0 22px;
-  border-radius: 14px;
-  background: #2563eb;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
 }
 
-/* STATS */
+/* =========================================================
+   TOP STATS GRID
+   Grid untuk Financial Health, Balance, Income, Expense
+========================================================= */
 .stats-grid {
   display: grid;
   grid-template-columns: 1.25fr repeat(3, minmax(0, 1fr));
@@ -86,10 +121,16 @@
   border-radius: 22px;
 }
 
+/* =========================================================
+   FINANCIAL HEALTH CARD
+   Card score kesehatan finansial
+========================================================= */
 .health-score-card {
-  background: linear-gradient(135deg, #0f172a, #172554);
-  color: white;
-  border: none;
+  position: relative !important;
+  overflow: hidden !important;
+  background: linear-gradient(135deg, #0f172a, #172554) !important;
+  color: #ffffff !important;
+  border: none !important;
 }
 
 .health-score-top {
@@ -103,6 +144,7 @@
   font-size: 13px;
   color: rgba(255, 255, 255, 0.75);
   margin-bottom: 10px;
+  text-transform: uppercase;
 }
 
 .health-score-card h2 {
@@ -110,6 +152,7 @@
   font-weight: 700;
   line-height: 1;
   letter-spacing: -2px;
+  color: #ffffff;
 }
 
 .health-indicator {
@@ -121,6 +164,7 @@
   justify-content: center;
   font-size: 12px;
   font-weight: 800;
+  flex-shrink: 0;
 }
 
 .health-indicator.excellent {
@@ -169,22 +213,15 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
+/* =========================================================
+   PREMIUM STAT CARD
+   Card Total Balance, Income, dan Expense
+========================================================= */
 .premium-stat {
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.balance-stat::after {
-  content: '';
-  position: absolute;
-  width: 150px;
-  height: 150px;
-  top: -80px;
-  right: -55px;
-  border-radius: 50%;
-  background: #eef4ff;
 }
 
 .premium-stat > * {
@@ -234,12 +271,6 @@
   margin: auto 0 16px;
 }
 
-.stat-footer span:last-child {
-  font-size: 14px;
-  font-weight: 600;
-  color: #64748b;
-}
-
 .stat-progress {
   width: 100%;
   height: 8px;
@@ -265,33 +296,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-
   margin-top: auto;
   padding-top: 18px;
-
   border-top: 1px solid #e9eef5;
-}
-
-.limit-badge {
-  flex-shrink: 0;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  min-height: 34px;
-
-  padding: 0 12px;
-
-  border-radius: 10px;
-
-  background: #fee2e2;
-  color: #ef4444;
-
-  font-size: 11px;
-  font-weight: 800;
-
-  white-space: nowrap;
 }
 
 .stat-footer span:last-child {
@@ -301,7 +308,25 @@
   line-height: 1.3;
 }
 
-/* MAIN GRID */
+.limit-badge {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: #fee2e2;
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   MAIN DASHBOARD GRID
+   Grid untuk chart, AI insight, recommendation, financial status
+========================================================= */
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
@@ -317,75 +342,16 @@
   display: contents;
 }
 
+/* =========================================================
+   CHART CARD
+   Card Cashflow Projection
+========================================================= */
 .chart-card {
   grid-area: chart;
   padding: 28px;
   min-height: 440px;
   display: flex;
   flex-direction: column;
-}
-
-.ai-card {
-  grid-area: ai;
-  padding: 28px;
-  border-radius: 24px;
-  background: linear-gradient(135deg, #0057ff, #0040c9);
-  color: white;
-  box-shadow: 0 20px 40px rgba(0, 87, 255, 0.2);
-}
-
-.recommendation-card {
-  grid-area: recommendation;
-  padding: 28px;
-  min-height: 260px;
-}
-
-.market-card {
-  grid-area: status;
-  padding: 28px;
-  min-height: 260px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
-}
-
-.status-bottom {
-  padding-top: 18px;
-  border-top: 1px solid #edf1f7;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  color: #64748b;
-  font-size: 13px;
-}
-
-.status-bottom strong {
-  color: #0f172a;
-  font-size: 15px;
-}
-
-.card-header {
-  margin-bottom: 22px;
-}
-
-.card-header h2,
-.ai-card-header h2 {
-  font-size: 24px;
-  font-weight: 800;
-  margin-bottom: 6px;
-}
-
-.card-header p,
-.ai-card-header p {
-  font-size: 13px;
-  color: #64748b;
-}
-
-.ai-card-header p {
-  color: rgba(255, 255, 255, 0.82);
 }
 
 .dashboard-chart-wrapper {
@@ -407,47 +373,196 @@
   outline: none;
 }
 
-/* AI */
-.ai-card-header {
-  margin-bottom: 20px;
+/* =========================================================
+   GENERAL CARD HEADER
+   Header kecil di dalam card
+========================================================= */
+.card-header {
+  margin-bottom: 22px;
 }
 
-.ai-insight-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.ai-insight-item {
-  padding: 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.ai-insight-item.success {
-  background: rgba(34, 197, 94, 0.14);
-}
-
-.ai-insight-item.warning {
-  background: rgba(245, 158, 11, 0.14);
-}
-
-.ai-insight-item.danger {
-  background: rgba(239, 68, 68, 0.14);
-}
-
-.ai-insight-item h4 {
-  font-size: 14px;
+.card-header h2,
+.ai-card-header h2 {
+  font-size: 24px;
+  font-weight: 800;
   margin-bottom: 6px;
 }
 
-.ai-insight-item p {
-  font-size: 12px;
-  opacity: 0.9;
-  line-height: 1.5;
+.card-header p,
+.ai-card-header p {
+  font-size: 13px;
+  color: #64748b;
 }
 
-/* RECOMMENDATION */
+/* =========================================================
+   AI INSIGHTS CARD - UPDATED PREMIUM
+   Card AI Insights dengan efek gradient dan glassmorphism
+========================================================= */
+.ai-card {
+  grid-area: ai;
+  position: relative;
+  overflow: hidden;
+  padding: 28px;
+  min-height: 440px;
+  border-radius: 24px;
+  border: none;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 85% 15%, rgba(34, 197, 94, 0.22), transparent 32%),
+    radial-gradient(circle at 8% 90%, rgba(96, 165, 250, 0.2), transparent 34%),
+    linear-gradient(135deg, #0f172a 0%, #172554 52%, #1d4ed8 100%);
+  box-shadow: 0 24px 46px rgba(37, 99, 235, 0.18);
+}
+
+/* Dekorasi glow kanan atas AI card */
+.ai-card::before {
+  content: '';
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  right: -90px;
+  top: -90px;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.13);
+}
+
+/* Dekorasi glow kiri bawah AI card */
+.ai-card::after {
+  content: '';
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  left: -85px;
+  bottom: -85px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ai-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ai-card-header {
+  margin-bottom: 24px;
+}
+
+.ai-card-header h2 {
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.7px;
+}
+
+.ai-card-header p {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* List wrapper insight */
+.ai-insight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Item insight individual */
+.ai-insight-item {
+  position: relative;
+  overflow: hidden;
+  padding: 20px 20px 20px 22px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Garis indikator status di sisi kiri item */
+.ai-insight-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 4px;
+  border-radius: 999px;
+}
+
+.ai-insight-item.success::before {
+  background: #22c55e;
+}
+
+.ai-insight-item.warning::before {
+  background: #f59e0b;
+}
+
+.ai-insight-item.danger::before {
+  background: #ef4444;
+}
+
+.ai-insight-item.neutral::before {
+  background: #60a5fa;
+}
+
+/* Background item berdasarkan status */
+.ai-insight-item.success {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.18),
+    rgba(255, 255, 255, 0.08)
+  );
+}
+
+.ai-insight-item.warning {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.18),
+    rgba(255, 255, 255, 0.08)
+  );
+}
+
+.ai-insight-item.danger {
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.18),
+    rgba(255, 255, 255, 0.08)
+  );
+}
+
+.ai-insight-item.neutral {
+  background: linear-gradient(
+    135deg,
+    rgba(96, 165, 250, 0.18),
+    rgba(255, 255, 255, 0.08)
+  );
+}
+
+.ai-insight-item h4 {
+  font-size: 15px;
+  font-weight: 900;
+  margin-bottom: 7px;
+  color: #ffffff;
+}
+
+.ai-insight-item p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
+}
+
+/* =========================================================
+   RECOMMENDATION CARD
+   Card Smart Recommendations
+========================================================= */
+.recommendation-card {
+  grid-area: recommendation;
+  padding: 28px;
+  min-height: 260px;
+}
+
 .recommendation-list {
   display: flex;
   flex-direction: column;
@@ -494,36 +609,124 @@
   line-height: 1.5;
 }
 
-.market-card h4 {
+/* =========================================================
+   FINANCIAL STATUS CARD
+   Card status kondisi finansial
+========================================================= */
+/* FINANCIAL STATUS - PREMIUM */
+.market-card {
+  grid-area: status;
+  position: relative;
+  overflow: hidden;
+  padding: 28px;
+  min-height: 260px;
+  border: none;
+  border-radius: 24px;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
+}
+
+.market-card::after {
+  content: '';
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: 76px;
+  height: 1px;
+  background: #e8eef6;
+}
+
+.market-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.status-top h4 {
   font-size: 13px;
+  font-weight: 900;
   color: #64748b;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
+}
+
+.status-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .market-card h3 {
-  font-size: 28px;
-  margin-bottom: 10px;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: -1.8px;
+  color: #0f172a;
+  margin: 0;
 }
 
-.market-card p {
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.status-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-badge.healthy {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-badge.healthy::before {
+  background: #22c55e;
+}
+
+.status-badge.review {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.status-badge.review::before {
+  background: #ef4444;
+}
+
+.status-bottom {
+  margin-top: auto;
+  padding-top: 22px;
+  border-top: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   color: #64748b;
-  font-size: 13px;
+  font-size: 14px;
 }
 
-/* SUMMARY - FIX BAGIAN INI */
+.status-bottom strong {
+  color: #0f172a;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+/* =========================================================
+   SUMMARY GRID
+   Card Budget Overview, Goals Progress, Recent Transactions
+========================================================= */
 .dashboard-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
-  align-items: stretch;
-  margin-bottom: 40px;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 24px !important;
 
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  width: calc(100% - 96px) !important;
+  margin: 0 auto 40px auto !important;
 
-  padding-left: 48px;
-  padding-right: 48px;
+  padding: 0 !important;
 }
 
 .dashboard-summary-grid > * {
@@ -626,6 +829,7 @@
   background: linear-gradient(90deg, #2563eb, #60a5fa);
 }
 
+/* Recent transaction item */
 .dashboard-transaction-item {
   display: flex;
   justify-content: space-between;
@@ -648,6 +852,7 @@
   white-space: nowrap;
 }
 
+/* Empty state untuk card kosong */
 .dashboard-empty {
   flex: 1;
   min-height: 220px;
@@ -697,7 +902,10 @@
   background: #f8fafc;
 }
 
-/* RESPONSIVE */
+/* =========================================================
+   RESPONSIVE DESIGN
+   Menyesuaikan layout di layar kecil
+========================================================= */
 @media (max-width: 1400px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -720,8 +928,7 @@
 
   .dashboard-summary-grid {
     grid-template-columns: 1fr;
-    padding-left: 48px;
-    padding-right: 48px;
+    padding: 0;
   }
 }
 
@@ -738,6 +945,12 @@
     width: 100%;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .filter-buttons,
+  .export-report-btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .stats-grid {
@@ -758,84 +971,6 @@
 
   .dashboard-summary-grid {
     grid-template-columns: 1fr;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 0;
   }
-}
-
-.health-score-card {
-  padding: 28px;
-  min-height: 230px;
-  overflow: hidden;
-}
-
-.health-score-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 18px;
-}
-
-.health-score-card h4 {
-  font-size: 13px;
-  font-weight: 800;
-  color: #64748b;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-
-.health-score-card h2 {
-  font-size: clamp(42px, 4vw, 64px);
-  line-height: 0.95;
-  letter-spacing: -0.06em;
-  color: #0f172a;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.health-indicator {
-  flex-shrink: 0;
-
-  width: 70px;
-  height: 70px;
-
-  border-radius: 999px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 12px;
-  font-weight: 800;
-
-  padding: 10px;
-
-  text-align: center;
-}
-
-.health-progress {
-  width: 100%;
-  height: 10px;
-  margin: 22px 0 18px;
-  background: #e5e7eb;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.health-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-}
-
-.health-score-card p {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #64748b;
-  margin: 0;
-  user-select: none;
-}
-
-.health-score-card,
-.health-score-card * {
-  user-select: none;
 }

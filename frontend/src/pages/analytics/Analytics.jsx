@@ -283,7 +283,7 @@ export default function Analytics() {
                       nameKey="name"
                       innerRadius={60}
                       outerRadius={90}
-                      paddingAngle={4}
+                      paddingAngle={2}
                     >
                       {categoryAllocation.map((entry) => (
                         <Cell key={entry.name} fill={entry.color} />
@@ -322,7 +322,7 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="app-card table-card analytics-table-card">
+        <div className="app-card category-performance-card">
           <div className="card-header analytics-table-header">
             <div>
               <h2 className="card-title">Category Performance</h2>

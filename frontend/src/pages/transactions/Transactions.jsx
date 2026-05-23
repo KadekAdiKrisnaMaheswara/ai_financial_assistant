@@ -7,10 +7,18 @@ import './Transactions.css'
 export default function Transactions() {
   const [transactions, setTransactions] = useState([])
   const [categories, setCategories] = useState([])
-  const [activeFilter, setActiveFilter] = useState('all')
   const [activePanel, setActivePanel] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [goals, setGoals] = useState([])
+  const [receiptFile, setReceiptFile] = useState(null)
+  const [isScanningReceipt, setIsScanningReceipt] = useState(false)
+
+  const [filters, setFilters] = useState({
+    search: '',
+    type: 'all',
+    category: 'all',
+    period: 'all',
+  })
 
   const defaultForm = {
     description: '',
@@ -56,13 +64,13 @@ export default function Transactions() {
   }, [token])
 
   const fetchGoals = useCallback(async () => {
-  try {
-    const response = await api.get('/goals', authHeader)
-    setGoals(response.data)
-  } catch (error) {
-    console.log(error)
-  }
-}, [token])
+    try {
+      const response = await api.get('/goals', authHeader)
+      setGoals(response.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [token])
 
   useEffect(() => {
     if (token) {
@@ -77,12 +85,65 @@ export default function Transactions() {
   )
 
   const filteredTransactions = useMemo(() => {
-    if (activeFilter === 'all') return transactions
+    const today = new Date()
 
-    return transactions.filter(
-      (transaction) => transaction.category_id === activeFilter
-    )
-  }, [transactions, activeFilter])
+    return transactions.filter((transaction) => {
+      const transactionDate = transaction.transaction_date
+        ? new Date(transaction.transaction_date)
+        : null
+
+      const matchesSearch =
+        !filters.search ||
+        transaction.description
+          ?.toLowerCase()
+          .includes(filters.search.toLowerCase()) ||
+        transaction.notes?.toLowerCase().includes(filters.search.toLowerCase())
+
+      const matchesType =
+        filters.type === 'all' || transaction.type === filters.type
+
+      const matchesCategory =
+        filters.category === 'all' ||
+        transaction.category_id === filters.category
+
+      let matchesPeriod = true
+
+      if (transactionDate && filters.period !== 'all') {
+        const startOfToday = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate()
+        )
+
+        if (filters.period === 'today') {
+          matchesPeriod = transactionDate >= startOfToday
+        }
+
+        if (filters.period === 'week') {
+          const startOfWeek = new Date(startOfToday)
+          startOfWeek.setDate(startOfToday.getDate() - startOfToday.getDay())
+          matchesPeriod = transactionDate >= startOfWeek
+        }
+
+        if (filters.period === 'month') {
+          const startOfMonth = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            1
+          )
+          matchesPeriod = transactionDate >= startOfMonth
+        }
+
+        if (filters.period === '30days') {
+          const last30Days = new Date(startOfToday)
+          last30Days.setDate(startOfToday.getDate() - 30)
+          matchesPeriod = transactionDate >= last30Days
+        }
+      }
+
+      return matchesSearch && matchesType && matchesCategory && matchesPeriod
+    })
+  }, [transactions, filters])
 
   const monthlyOutflow = useMemo(() => {
     return transactions
@@ -90,48 +151,130 @@ export default function Transactions() {
       .reduce((total, item) => total + Number(item.amount), 0)
   }, [transactions])
 
+  const formatRupiah = (value) => {
+    const numberString = String(value).replace(/[^\d]/g, '')
+
+    if (!numberString) return ''
+
+    return new Intl.NumberFormat('id-ID').format(Number(numberString))
+  }
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target
+
+    setFilters({
+      ...filters,
+      [name]: value,
+    })
+  }
+
+  const handleResetFilters = () => {
+    setFilters({
+      search: '',
+      type: 'all',
+      category: 'all',
+      period: 'all',
+    })
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target
 
-if (name === 'goal_id') {
-  const savingsCategory = categories.find(
-    (category) =>
-      category.name.toLowerCase() === 'savings' &&
-      category.type === 'expense'
-  )
+    if (name === 'amount') {
+      const rawValue = value.replace(/[^\d]/g, '')
 
-  if (value && !savingsCategory) {
-    alert('Category Savings belum tersedia. Jalankan seed atau buat category Savings terlebih dahulu.')
-    return
-  }
+      setForm({
+        ...form,
+        amount: rawValue,
+      })
 
-  setForm({
-    ...form,
-    goal_id: value,
-    type: value ? 'expense' : form.type,
-    category_id: value && savingsCategory ? savingsCategory.id : '',
-  })
+      return
+    }
 
-  return
-}
-  
+    if (name === 'goal_id') {
+      const savingsCategory = categories.find(
+        (category) =>
+          category.name.toLowerCase() === 'savings' &&
+          category.type === 'expense'
+      )
+
+      if (value && !savingsCategory) {
+        alert(
+          'Category Savings belum tersedia. Jalankan seed atau buat category Savings terlebih dahulu.'
+        )
+        return
+      }
+
+      setForm({
+        ...form,
+        goal_id: value,
+        type: value ? 'expense' : form.type,
+        category_id: value && savingsCategory ? savingsCategory.id : '',
+      })
+
+      return
+    }
+
     setForm({
       ...form,
       [name]: value,
     })
   }
 
-const handleTypeChange = (e) => {
-  if (form.goal_id) {
-    return
+  const handleTypeChange = (e) => {
+    if (form.goal_id) return
+
+    setForm({
+      ...form,
+      type: e.target.value,
+      category_id: '',
+    })
   }
 
-  setForm({
-    ...form,
-    type: e.target.value,
-    category_id: '',
-  })
-}
+  const handleScanReceipt = async () => {
+    if (!receiptFile) {
+      alert('Pilih file struk terlebih dahulu')
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('receipt', receiptFile)
+
+    try {
+      setIsScanningReceipt(true)
+
+      const response = await api.post('/receipts/scan', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      const parsed = response.data.data.parsed
+
+      setForm({
+        ...form,
+        description: parsed.description || form.description,
+        amount: parsed.amount ? String(parsed.amount) : form.amount,
+        type: parsed.type || 'expense',
+        transaction_date: parsed.transaction_date
+          ? new Date(parsed.transaction_date).toISOString().split('T')[0]
+          : form.transaction_date,
+        notes: parsed.notes || form.notes,
+        goal_id: '',
+        category_id: '',
+      })
+
+      alert(
+        'Struk berhasil discan. Silakan pilih kategori lalu simpan transaksi.'
+      )
+    } catch (error) {
+      console.log(error)
+      alert(error.response?.data?.message || 'Gagal scan struk')
+    } finally {
+      setIsScanningReceipt(false)
+    }
+  }
 
   const handleCategoryChange = (e) => {
     setCategoryForm({
@@ -163,6 +306,7 @@ const handleTypeChange = (e) => {
       }
 
       setForm(defaultForm)
+      setReceiptFile(null)
       setEditingId(null)
       setActivePanel(null)
       fetchTransactions()
@@ -187,10 +331,11 @@ const handleTypeChange = (e) => {
         : new Date().toISOString().split('T')[0],
       notes: item.notes || '',
     })
+
     window.scrollTo({
-    top: 0,
-    behavior: 'smooth',
-  })
+      top: 0,
+      behavior: 'smooth',
+    })
   }
 
   const handleCancelEdit = () => {
@@ -208,7 +353,6 @@ const handleTypeChange = (e) => {
 
     try {
       await api.delete(`/transactions/${id}`, authHeader)
-
       alert('Transaksi berhasil dihapus')
       fetchTransactions()
     } catch (error) {
@@ -244,7 +388,9 @@ const handleTypeChange = (e) => {
         <div className="page-header transactions-top">
           <div>
             <h1 className="page-title">Transactions</h1>
-            <p className="page-subtitle">Review and manage your financial asset movements.</p>
+            <p className="page-subtitle">
+              Review and manage your financial asset movements.
+            </p>
           </div>
 
           <div className="page-actions transactions-actions">
@@ -274,7 +420,10 @@ const handleTypeChange = (e) => {
         </div>
 
         {activePanel === 'transaction' && (
-          <form className="app-card app-card-p floating-form-card" onSubmit={handleSubmitTransaction}>
+          <form
+            className="app-card app-card-p floating-form-card"
+            onSubmit={handleSubmitTransaction}
+          >
             <div className="card-header form-title-row">
               <h2>{editingId ? 'Edit Transaction' : 'Add Transaction'}</h2>
 
@@ -289,10 +438,40 @@ const handleTypeChange = (e) => {
               )}
             </div>
 
+            {!editingId && (
+              <div className="receipt-upload-box">
+                <div>
+                  <label className="form-label">Upload Receipt</label>
+                  <p className="receipt-upload-text">
+                    Upload struk belanja untuk mengisi transaksi otomatis.
+                  </p>
+                </div>
+
+                <div className="receipt-upload-actions">
+                  <input
+                    className="form-control"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png"
+                    onChange={(e) => setReceiptFile(e.target.files[0])}
+                  />
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={handleScanReceipt}
+                    disabled={isScanningReceipt}
+                  >
+                    {isScanningReceipt ? 'Scanning...' : 'Scan Receipt'}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="form-grid">
               <div>
                 <label className="form-label">Description</label>
-                <input className="form-control"
+                <input
+                  className="form-control"
                   type="text"
                   name="description"
                   placeholder="Example: Coffee, Salary"
@@ -304,7 +483,13 @@ const handleTypeChange = (e) => {
 
               <div>
                 <label className="form-label">Type</label>
-                <select name="type" value={form.type} onChange={handleTypeChange} disabled={!!form.goal_id}>
+                <select
+                  className="form-control"
+                  name="type"
+                  value={form.type}
+                  onChange={handleTypeChange}
+                  disabled={!!form.goal_id}
+                >
                   <option value="income">Income / Pemasukan</option>
                   <option value="expense">Expense / Pengeluaran</option>
                 </select>
@@ -312,67 +497,72 @@ const handleTypeChange = (e) => {
 
               <div>
                 <label className="form-label">Amount</label>
-                <input className="form-control"
-                  type="number"
+                <input
+                  className="form-control"
+                  type="text"
                   name="amount"
-                  placeholder="Example: 100000"
-                  value={form.amount}
+                  placeholder="Example: Rp 100.000"
+                  value={form.amount ? `Rp ${formatRupiah(form.amount)}` : ''}
                   onChange={handleChange}
                   required
                 />
               </div>
 
-{!form.goal_id && (
-  <div>
-    <label className="form-label">Category</label>
-    <select className="form-control"
-      name="category_id"
-      value={form.category_id}
-      onChange={handleChange}
-      required
-    >
-      <option value="">Select category</option>
+              {!form.goal_id && (
+                <div>
+                  <label className="form-label">Category</label>
+                  <select
+                    className="form-control"
+                    name="category_id"
+                    value={form.category_id}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select category</option>
 
-      {filteredCategories.map((category) => (
-        <option key={category.id} value={category.id}>
-          {category.name}
-        </option>
-      ))}
-    </select>
-  </div>
-)}
+                    {filteredCategories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-{form.goal_id && (
-  <div>
-    <label className="form-label">Category</label>
-    <input className="form-control"
-      type="text"
-      value="Savings"
-      disabled
-    />
-  </div>
-)}
+              {form.goal_id && (
+                <div>
+                  <label className="form-label">Category</label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    value="Savings"
+                    disabled
+                  />
+                </div>
+              )}
 
               <div>
-  <label className="form-label">Allocate to Goal</label>
-  <select className="form-control"
-    name="goal_id"
-    value={form.goal_id}
-    onChange={handleChange}
-  >
-    <option value="">No Goal</option>
+                <label className="form-label">Allocate to Goal</label>
+                <select
+                  className="form-control"
+                  name="goal_id"
+                  value={form.goal_id}
+                  onChange={handleChange}
+                >
+                  <option value="">No Goal</option>
 
-    {goals.map((goal) => (
-      <option key={goal.id} value={goal.id}>
-        {goal.name}
-      </option>
-    ))}
-  </select>
-</div>
+                  {goals.map((goal) => (
+                    <option key={goal.id} value={goal.id}>
+                      {goal.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div>
                 <label className="form-label">Date</label>
-                <input className="form-control"
+                <input
+                  className="form-control"
                   type="date"
                   name="transaction_date"
                   value={form.transaction_date}
@@ -383,7 +573,8 @@ const handleTypeChange = (e) => {
 
               <div>
                 <label className="form-label">Notes</label>
-                <input className="form-control"
+                <input
+                  className="form-control"
                   type="text"
                   name="notes"
                   placeholder="Optional notes"
@@ -393,20 +584,27 @@ const handleTypeChange = (e) => {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-full submit-action">
+            <button
+              type="submit"
+              className="btn btn-primary btn-full submit-action"
+            >
               {editingId ? 'Update Transaction' : 'Save Transaction'}
             </button>
           </form>
         )}
 
         {activePanel === 'category' && (
-          <form className="app-card app-card-p floating-form-card" onSubmit={handleCreateCategory}>
+          <form
+            className="app-card app-card-p floating-form-card"
+            onSubmit={handleCreateCategory}
+          >
             <h2>Create Category</h2>
 
             <div className="form-grid">
               <div>
                 <label className="form-label">Category Name</label>
-                <input className="form-control"
+                <input
+                  className="form-control"
                   type="text"
                   name="name"
                   placeholder="Example: Coffee"
@@ -418,7 +616,8 @@ const handleTypeChange = (e) => {
 
               <div>
                 <label className="form-label">Type</label>
-                <select className="form-control"
+                <select
+                  className="form-control"
                   name="type"
                   value={categoryForm.type}
                   onChange={handleCategoryChange}
@@ -429,34 +628,84 @@ const handleTypeChange = (e) => {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-full submit-action">
+            <button
+              type="submit"
+              className="btn btn-primary btn-full submit-action"
+            >
               Save Category
             </button>
           </form>
         )}
 
         <div className="transactions-overview">
-          <div className="app-card filter-card">
-            <span className="filter-label">FILTERS:</span>
+          <div className="app-card filter-card transaction-filter-panel">
+            <div className="filter-field">
+              <label className="filter-label">Search</label>
+              <input
+                className="form-control"
+                type="text"
+                name="search"
+                placeholder="Search transaction"
+                value={filters.search}
+                onChange={handleFilterChange}
+              />
+            </div>
+
+            <div className="filter-field">
+              <label className="filter-label">Type</label>
+              <select
+                className="form-control"
+                name="type"
+                value={filters.type}
+                onChange={handleFilterChange}
+              >
+                <option value="all">All Type</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+
+            <div className="filter-field">
+              <label className="filter-label">Category</label>
+              <select
+                className="form-control"
+                name="category"
+                value={filters.category}
+                onChange={handleFilterChange}
+              >
+                <option value="all">All Category</option>
+
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-field">
+              <label className="filter-label">Period</label>
+              <select
+                className="form-control"
+                name="period"
+                value={filters.period}
+                onChange={handleFilterChange}
+              >
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="30days">Last 30 Days</option>
+              </select>
+            </div>
 
             <button
-              className={`filter-pill ${activeFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setActiveFilter('all')}
+              type="button"
+              className="btn btn-secondary filter-reset-btn"
+              onClick={handleResetFilters}
             >
-              All Activity
+              Reset
             </button>
-
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                className={`filter-pill ${
-                  activeFilter === category.id ? 'active' : ''
-                }`}
-                onClick={() => setActiveFilter(category.id)}
-              >
-                {category.name}
-              </button>
-            ))}
           </div>
 
           <div className="app-card metric-card summary-card">
@@ -491,14 +740,14 @@ const handleTypeChange = (e) => {
                   <tr key={item.id}>
                     <td>
                       <div className="transaction-name">
-                        <div 
-  className={`transaction-icon ${
-    item.type === 'income'
-      ? 'transaction-icon-income'
-      : 'transaction-icon-expense'
-  }`}
->
-  {item.type === 'income' ? '↗' : '↘'}
+                        <div
+                          className={`transaction-icon ${
+                            item.type === 'income'
+                              ? 'transaction-icon-income'
+                              : 'transaction-icon-expense'
+                          }`}
+                        >
+                          {item.type === 'income' ? '↗' : '↘'}
                         </div>
 
                         <div>

@@ -42,11 +42,25 @@ export default function Goals() {
     }
   }, [fetchGoals, token])
 
+  const formatRupiah = (value) => {
+  const numberString = value.replace(/[^\d]/g, '')
+
+  if (!numberString) return ''
+
+  return new Intl.NumberFormat('id-ID').format(numberString)
+}
+
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    })
+if (name === 'amount') {
+  const rawValue = value.replace(/[^\d]/g, '')
+
+  setForm({
+    ...form,
+    amount: rawValue,
+  })
+
+  return
+}
   }
 
   const resetForm = () => {
@@ -179,10 +193,10 @@ export default function Goals() {
               <div>
                 <label className="form-label">Target Amount</label>
                 <input className="form-control"
-                  type="number"
+                  type="text"
                   name="target_amount"
-                  placeholder="Example: 10000000"
-                  value={form.target_amount}
+                  placeholder="Example: Rp 10.000.000"
+                  value={form.target_amount ? formatRupiah(form.target_amount) : ''}
                   onChange={handleChange}
                   required
                 />

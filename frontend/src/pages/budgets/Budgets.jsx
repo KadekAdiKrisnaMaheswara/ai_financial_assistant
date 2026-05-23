@@ -73,17 +73,31 @@ export default function Budgets() {
     }
   }, [fetchBudgets, fetchCategories, fetchTransactions, token])
 
+  const formatRupiah = (value) => {
+  const numberString = value.replace(/[^\d]/g, '')
+
+  if (!numberString) return ''
+
+  return new Intl.NumberFormat('id-ID').format(numberString)
+}
+
   const handleChange = (e) => {
     const { name, value } = e.target
+if (name === 'amount') {
+  const rawValue = value.replace(/[^\d]/g, '')
 
-    if (name === 'period') {
-      setForm({
-        ...form,
-        period: value,
-        end_date: calculateEndDate(form.start_date, value),
-      })
-      return
-    }
+  setForm({
+    ...form,
+    amount: rawValue,
+  })
+
+  return
+}
+
+setForm({
+  ...form,
+  [name]: value,
+})
 
     if (name === 'start_date') {
       setForm({
@@ -285,10 +299,10 @@ export default function Budgets() {
               <label className="form-label">Limit Amount</label>
               <input
                 className="form-control"
-                type="number"
+                type="text"
                 name="limit_amount"
-                placeholder="Example: 1000000"
-                value={form.limit_amount}
+                placeholder="Example: Rp 100.000"
+                value={form.limit_amount ? formatRupiah(form.limit_amount) : ''}
                 onChange={handleChange}
                 required
               />
@@ -425,7 +439,7 @@ export default function Budgets() {
                     : 'budget-status safe'
               }
             >
-              {isOverBudget ? 'Over Budget' : percentage >= 75 ? 'Warning' : 'Safe'}
+              {isOverBudget ? 'Over' : percentage >= 75 ? 'Warning' : 'Safe'}
             </span>
 
             <button
