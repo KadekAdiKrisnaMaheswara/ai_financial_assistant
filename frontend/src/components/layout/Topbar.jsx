@@ -10,6 +10,10 @@ function Topbar() {
   const [transactions, setTransactions] = useState([])
   const [showNotifications, setShowNotifications] = useState(false)
 
+  const [avatar, setAvatar] = useState(
+    localStorage.getItem('profile_picture') || 'https://i.pravatar.cc/100'
+  )
+
   const token = localStorage.getItem('token')
 
   useEffect(() => {
@@ -35,6 +39,25 @@ function Topbar() {
       fetchData()
     }
   }, [token])
+
+  useEffect(() => {
+    const handleProfilePictureChange = () => {
+      setAvatar(
+        localStorage.getItem('profile_picture') || 'https://i.pravatar.cc/100'
+      )
+    }
+
+    window.addEventListener('storage', handleProfilePictureChange)
+    window.addEventListener('profilePictureChanged', handleProfilePictureChange)
+
+    return () => {
+      window.removeEventListener('storage', handleProfilePictureChange)
+      window.removeEventListener(
+        'profilePictureChanged',
+        handleProfilePictureChange
+      )
+    }
+  }, [])
 
   const notifications = useMemo(() => {
     return budgets
@@ -84,10 +107,7 @@ function Topbar() {
       <div className="search-box">
         <Search size={20} />
 
-        <input
-          type="text"
-          placeholder="Search markets or assets..."
-        />
+        <input type="text" placeholder="Search markets or assets..." />
       </div>
 
       <div className="topbar-right">
@@ -101,23 +121,18 @@ function Topbar() {
           </button>
 
           {notifications.length > 0 && (
-            <span className="notification-badge">
-              {notifications.length}
-            </span>
+            <span className="notification-badge">{notifications.length}</span>
           )}
 
           {showNotifications && (
             <div className="aivest-notif-dropdown">
               <div className="aivest-notif-header">
                 <h4>Notifications</h4>
-
                 <span>{notifications.length}</span>
               </div>
 
               {notifications.length === 0 ? (
-                <p className="aivest-notif-empty">
-                  No notifications
-                </p>
+                <p className="aivest-notif-empty">No notifications</p>
               ) : (
                 notifications.map((item, index) => (
                   <div
@@ -145,10 +160,7 @@ function Topbar() {
             <p>Moderate Client</p>
           </div>
 
-          <img
-            src="https://i.pravatar.cc/100"
-            alt="profile"
-          />
+          <img src={avatar} alt="profile" />
         </div>
       </div>
     </header>

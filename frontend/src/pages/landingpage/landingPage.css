@@ -62,16 +62,15 @@
   gap: 14px;
 }
 
+.landing-brand img,
 .brand-logo {
-  width: 46px;
-  height: 46px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #2563eb, #0040c9);
-  color: white;
-  display: grid;
-  place-items: center;
-  font-weight: 900;
-  box-shadow: 0 16px 35px rgba(37, 99, 235, 0.25);
+  width: 60px;
+  height: 60px;
+  max-width: 60px;
+  max-height: 60px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
 }
 
 .landing-brand h1 {

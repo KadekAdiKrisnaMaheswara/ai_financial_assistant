@@ -14,6 +14,7 @@ import {
 
 import MainLayout from '../../components/layout/MainLayout'
 import api from '../../api/axios'
+import '../../styles/components.css'
 import './Analytics.css'
 
 export default function Analytics() {
@@ -136,11 +137,11 @@ export default function Analytics() {
 
   return (
     <MainLayout>
-      <div className="analytics-page">
-        <div className="analytics-header">
+      <div className="app-page analytics-page">
+        <div className="page-header analytics-header">
           <div>
-            <h1>Analytics Hub</h1>
-            <p>
+            <h1 className="page-title">Analytics Hub</h1>
+            <p className="page-subtitle">
               Deep financial diagnostics, spending behavior, and category-level
               performance analysis.
             </p>
@@ -148,21 +149,21 @@ export default function Analytics() {
         </div>
 
         <div className="analytics-stats">
-          <div className="analytics-card">
+          <div className="app-card metric-card analytics-card">
             <span>Saving Ratio</span>
             <h2>{savingRatio}%</h2>
-            <p className={savingRatio >= 20 ? 'positive' : 'negative'}>
+            <p className={savingRatio >= 20 ? 'text-success positive' : 'text-danger negative'}>
               {savingRatio >= 20 ? 'Healthy saving margin' : 'Needs improvement'}
             </p>
           </div>
 
-          <div className="analytics-card">
+          <div className="app-card metric-card analytics-card">
             <span>Avg Daily Expense</span>
             <h2>Rp {Math.round(averageDailyExpense).toLocaleString('id-ID')}</h2>
             <p className="neutral">Based on active spending days</p>
           </div>
 
-          <div className="analytics-card">
+          <div className="app-card metric-card analytics-card">
             <span>Top Spending</span>
             <h2>{topCategory?.name || '-'}</h2>
             <p className="neutral">
@@ -172,17 +173,17 @@ export default function Analytics() {
             </p>
           </div>
 
-          <div className="analytics-card">
+          <div className="app-card metric-card analytics-card">
             <span>Risk Exposure</span>
             <h2>{riskLevel}</h2>
-            <p className={riskLevel === 'High' ? 'negative' : 'positive'}>
+            <p className={riskLevel === 'High' ? 'text-danger negative' : 'text-success positive'}>
               {riskLevel === 'High' ? 'Needs attention' : 'Controlled spending'}
             </p>
           </div>
         </div>
 
         <div className="analytics-grid">
-          <div className="analytics-chart-card velocity-card">
+          <div className="app-card app-card-p analytics-chart-card velocity-card">
             <div className="chart-header">
               <div>
                 <h2>Income vs Expense Trend</h2>
@@ -266,8 +267,8 @@ export default function Analytics() {
             </div>
           </div>
 
-          <div className="analytics-chart-card allocation-card">
-            <h2>Expense Allocation</h2>
+          <div className="app-card app-card-p analytics-chart-card allocation-card">
+            <h2 className="card-title">Expense Allocation</h2>
             <p>Breakdown of spending by category.</p>
 
             <div className="donut-wrapper">
@@ -321,15 +322,15 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="analytics-table-card">
-          <div className="analytics-table-header">
+        <div className="app-card table-card analytics-table-card">
+          <div className="card-header analytics-table-header">
             <div>
-              <h2>Category Performance</h2>
+              <h2 className="card-title">Category Performance</h2>
               <p>Detailed expense contribution by category.</p>
             </div>
           </div>
 
-          <table>
+          <table className="app-table">
             <thead>
               <tr>
                 <th>Category</th>
@@ -362,10 +363,10 @@ export default function Analytics() {
                         <span
                           className={
                             percentage >= 40
-                              ? 'analytics-badge danger'
+                              ? 'status-badge status-danger'
                               : percentage >= 25
-                                ? 'analytics-badge warning'
-                                : 'analytics-badge safe'
+                                ? 'status-badge status-warning'
+                                : 'status-badge status-safe'
                           }
                         >
                           {percentage >= 40

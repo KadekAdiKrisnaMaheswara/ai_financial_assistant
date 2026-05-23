@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import MainLayout from '../../components/layout/MainLayout'
 import api from '../../api/axios'
+import '../../styles/components.css'
 import './budgets.css'
 
 const calculateEndDate = (startDate, period) => {
@@ -210,47 +211,49 @@ export default function Budgets() {
 
   return (
     <MainLayout>
-      <div className="budgets-page">
-        <div className="budgets-header">
+      <div className="app-page budgets-page">
+        <div className="page-header budgets-header">
           <div>
-            <h1>Budget Planner</h1>
-            <p>Set limits, track expenses, and control category spending.</p>
+            <h1 className="page-title">Budget Planner</h1>
+            <p className="page-subtitle">
+              Set limits, track expenses, and control category spending.
+            </p>
           </div>
 
-          <div className="budget-summary">
+          <div className="app-card budget-summary">
             <span>Total Budget</span>
             <strong>Rp {totalBudget.toLocaleString('id-ID')}</strong>
           </div>
         </div>
 
         <div className="budget-overview">
-          <div className="budget-metric-card">
+          <div className="app-card metric-card budget-metric-card">
             <span>Total Spent</span>
             <h2>Rp {totalSpent.toLocaleString('id-ID')}</h2>
             <p>Across active budget periods</p>
           </div>
 
-          <div className="budget-metric-card">
+          <div className="app-card metric-card budget-metric-card">
             <span>Remaining</span>
             <h2>Rp {(totalBudget - totalSpent).toLocaleString('id-ID')}</h2>
             <p>Available budget balance</p>
           </div>
 
-          <div className="budget-metric-card">
+          <div className="app-card metric-card budget-metric-card">
             <span>Active Budgets</span>
             <h2>{budgets.length}</h2>
             <p>Budget rules configured</p>
           </div>
         </div>
 
-        <form className="budget-form-card" onSubmit={handleSubmit}>
-          <div className="budget-form-header">
+        <form className="app-card app-card-p budget-form-card" onSubmit={handleSubmit}>
+          <div className="card-header budget-form-header">
             <h2>{editingId ? 'Edit Budget' : 'Create Budget'}</h2>
 
             {editingId && (
               <button
                 type="button"
-                className="cancel-budget-btn"
+                className="btn btn-secondary btn-sm cancel-budget-btn"
                 onClick={handleCancelEdit}
               >
                 Cancel Edit
@@ -258,10 +261,11 @@ export default function Budgets() {
             )}
           </div>
 
-          <div className="budget-form-grid">
+          <div className="form-grid budget-form-grid">
             <div>
-              <label>Category</label>
+              <label className="form-label">Category</label>
               <select
+                className="form-control"
                 name="category_id"
                 value={form.category_id}
                 onChange={handleChange}
@@ -278,8 +282,9 @@ export default function Budgets() {
             </div>
 
             <div>
-              <label>Limit Amount</label>
+              <label className="form-label">Limit Amount</label>
               <input
+                className="form-control"
                 type="number"
                 name="limit_amount"
                 placeholder="Example: 1000000"
@@ -290,8 +295,9 @@ export default function Budgets() {
             </div>
 
             <div>
-              <label>Period</label>
+              <label className="form-label">Period</label>
               <select
+                className="form-control"
                 name="period"
                 value={form.period}
                 onChange={handleChange}
@@ -303,8 +309,9 @@ export default function Budgets() {
             </div>
 
             <div>
-              <label>Start Date</label>
+              <label className="form-label">Start Date</label>
               <input
+                className="form-control"
                 type="date"
                 name="start_date"
                 value={form.start_date}
@@ -314,8 +321,9 @@ export default function Budgets() {
             </div>
 
             <div>
-              <label>End Date</label>
+              <label className="form-label">End Date</label>
               <input
+                className="form-control"
                 type="date"
                 name="end_date"
                 value={form.end_date}
@@ -325,140 +333,120 @@ export default function Budgets() {
             </div>
           </div>
 
-          <button className="budget-submit-btn" type="submit">
+          <button className="btn btn-primary btn-full budget-submit-btn" type="submit">
             {editingId ? 'Update Budget' : 'Save Budget'}
           </button>
         </form>
 
-        <div className="budget-table-card">
+        <div className="budget-table-card app-card">
           <div className="budget-table-header">
             <h2>Budget List</h2>
             <span>{budgets.length} budgets</span>
           </div>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Period</th>
-                <th>Limit</th>
-                <th>Spent</th>
-                <th>Progress</th>
-                <th>Status</th>
-                <th>Date Range</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+<div className="budget-list-wrapper">
+  {budgets.length === 0 ? (
+    <div className="empty-budget">No budgets yet.</div>
+  ) : (
+    budgets.map((budget) => {
+      const spent = calculateSpent(budget)
+      const limit = Number(budget.limit_amount)
+      const rawPercentage = limit > 0 ? (spent / limit) * 100 : 0
+      const percentage = Math.min(rawPercentage, 100)
+      const isOverBudget = spent > limit
 
-            <tbody>
-              {budgets.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="empty-budget">
-                    No budgets yet.
-                  </td>
-                </tr>
-              ) : (
-                budgets.map((budget) => {
-                  const spent = calculateSpent(budget)
-                  const limit = Number(budget.limit_amount)
-                  const rawPercentage = limit > 0 ? (spent / limit) * 100 : 0
-                  const percentage = Math.min(rawPercentage, 100)
-                  const isOverBudget = spent > limit
+      return (
+        <div className="budget-list-row" key={budget.id}>
+          <div className="budget-main-info">
+            <span className="budget-category-badge">
+              {budget.category?.name || 'Uncategorized'}
+            </span>
 
-                  return (
-                    <tr key={budget.id}>
-                      <td>
-                        <span className="budget-category-badge">
-                          {budget.category?.name || 'Uncategorized'}
-                        </span>
-                      </td>
+            <div>
+              <h4>{budget.period}</h4>
+              <p>
+                {new Date(budget.start_date).toLocaleDateString('id-ID')} -{' '}
+                {new Date(budget.end_date).toLocaleDateString('id-ID')}
+              </p>
+            </div>
+          </div>
 
-                      <td>{budget.period}</td>
+          <div className="budget-money-info">
+            <div>
+              <span>Limit</span>
+              <strong>Rp {limit.toLocaleString('id-ID')}</strong>
+            </div>
 
-                      <td>Rp {limit.toLocaleString('id-ID')}</td>
+            <div>
+              <span>Spent</span>
+              <strong>Rp {spent.toLocaleString('id-ID')}</strong>
+            </div>
+          </div>
 
-                      <td>Rp {spent.toLocaleString('id-ID')}</td>
+          <div className="budget-progress-area">
+            <div className="budget-progress-top">
+              <span>Progress</span>
+              <strong
+                className={
+                  isOverBudget
+                    ? 'danger'
+                    : percentage >= 75
+                      ? 'warning'
+                      : 'safe'
+                }
+              >
+                {isOverBudget
+                  ? `Over Rp ${(spent - limit).toLocaleString('id-ID')}`
+                  : `${Math.round(percentage)}%`}
+              </strong>
+            </div>
 
-<td className="budget-progress-cell">
-  <div className="budget-progress-row">
-    <div className="budget-progress-track">
-      <div
-        className={`budget-progress-fill ${
-          percentage >= 100
-            ? 'danger'
-            : percentage >= 75
-              ? 'warning'
-              : ''
-        }`}
-        style={{
-          width: `${Math.min(percentage, 100)}%`,
-        }}
-      ></div>
-    </div>
+            <div className="budget-progress-track">
+              <div
+                className={`budget-progress-fill ${
+                  percentage >= 100
+                    ? 'danger'
+                    : percentage >= 75
+                      ? 'warning'
+                      : ''
+                }`}
+                style={{ width: `${percentage}%` }}
+              ></div>
+            </div>
+          </div>
 
-    <span
-      className={`budget-progress-text ${
-        percentage >= 100
-          ? 'danger'
-          : percentage >= 75
-            ? 'warning'
-            : 'safe'
-      }`}
-    >
-      {percentage >= 100
-        ? `Over Rp ${(spent - limit).toLocaleString('id-ID')}`
-        : `${Math.round(percentage)}%`}
-    </span>
-  </div>
-</td>
+          <div className="budget-row-actions">
+            <span
+              className={
+                isOverBudget
+                  ? 'budget-status danger'
+                  : percentage >= 75
+                    ? 'budget-status warning'
+                    : 'budget-status safe'
+              }
+            >
+              {isOverBudget ? 'Over Budget' : percentage >= 75 ? 'Warning' : 'Safe'}
+            </span>
 
-                      <td>
-                        <span
-                          className={
-                            isOverBudget
-                              ? 'budget-status danger'
-                              : percentage >= 75
-                                ? 'budget-status warning'
-                                : 'budget-status safe'
-                          }
-                        >
-                          {isOverBudget
-                            ? 'Over Budget'
-                            : percentage >= 75
-                              ? 'Warning'
-                              : 'Safe'}
-                        </span>
-                      </td>
+            <button
+              className="btn btn-secondary btn-sm budget-edit-btn"
+              onClick={() => handleEdit(budget)}
+            >
+              Edit
+            </button>
 
-                      <td>
-                        {new Date(budget.start_date).toLocaleDateString('id-ID')}
-                        {' - '}
-                        {new Date(budget.end_date).toLocaleDateString('id-ID')}
-                      </td>
-
-                      <td>
-                        <div className="budget-actions">
-                          <button
-                            className="budget-edit-btn"
-                            onClick={() => handleEdit(budget)}
-                          >
-                            Edit
-                          </button>
-
-                          <button
-                            className="budget-delete-btn"
-                            onClick={() => handleDelete(budget.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
+            <button
+              className="btn btn-danger btn-sm budget-delete-btn"
+              onClick={() => handleDelete(budget.id)}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      )
+    })
+  )}
+</div>
         </div>
       </div>
     </MainLayout>

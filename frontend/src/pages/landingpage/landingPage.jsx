@@ -9,6 +9,7 @@ import {
   Wallet,
 } from 'lucide-react'
 import './landingPage.css'
+import logoAivest from '../../assets/logo-aivest.png'
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -20,7 +21,7 @@ export default function Landing() {
 
       <header className="landing-header">
         <div className="landing-brand">
-          <div className="brand-logo">A</div>
+          <img src={logoAivest} alt="AIVEST Logo" />
           <div>
             <h1>AIVEST</h1>
             <p>AI Financial Assistant</p>

@@ -2,16 +2,13 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
-  Bot,
-  ChartNoAxesCombined,
   Lock,
   Mail,
   ShieldCheck,
-  Target,
-  Wallet,
 } from 'lucide-react'
 import api from '../../api/axios'
 import './auth.css'
+import logoAivest from '../../assets/logo-aivest.png'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -44,8 +41,8 @@ export default function Login() {
       <div className="auth-orb two"></div>
 
       <section className="auth-showcase">
-        <div className="auth-brand">
-          <div className="auth-logo">A</div>
+        <div className="landing-brand">
+          <img src={logoAivest} alt="AIVEST Logo" />
           <div>
             <h1>AIVEST</h1>
             <p>AI Financial Assistant</p>
@@ -58,40 +55,6 @@ export default function Login() {
           Continue tracking your transactions, budgets, goals, and AI-powered
           financial insights in one dashboard.
         </p>
-
-        <div className="auth-feature-list">
-          <div className="auth-feature">
-            <Wallet size={22} />
-            <div>
-              <h4>Transactions</h4>
-              <p>Track income and spending clearly.</p>
-            </div>
-          </div>
-
-          <div className="auth-feature">
-            <Target size={22} />
-            <div>
-              <h4>Financial Goals</h4>
-              <p>Monitor your saving progress.</p>
-            </div>
-          </div>
-
-          <div className="auth-feature">
-            <Bot size={22} />
-            <div>
-              <h4>AI Insights</h4>
-              <p>Get personalized suggestions.</p>
-            </div>
-          </div>
-
-          <div className="auth-feature">
-            <ChartNoAxesCombined size={22} />
-            <div>
-              <h4>Analytics</h4>
-              <p>Visualize your financial activity.</p>
-            </div>
-          </div>
-        </div>
       </section>
 
       <section className="auth-form-side">
@@ -147,16 +110,6 @@ export default function Login() {
           </div>
         </form>
       </section>
-
-      <footer className="auth-footer">
-        <span>© 2026 AIVEST. All rights reserved.</span>
-
-        <div>
-          <span>Privacy Policy</span>
-          <span>Terms of Service</span>
-          <span>Security</span>
-        </div>
-      </footer>
     </div>
   )
 }

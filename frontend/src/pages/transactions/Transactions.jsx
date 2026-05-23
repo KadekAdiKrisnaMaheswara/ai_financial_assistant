@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import MainLayout from '../../components/layout/MainLayout'
 import api from '../../api/axios'
+import '../../styles/components.css'
 import './Transactions.css'
 
 export default function Transactions() {
@@ -239,16 +240,16 @@ const handleTypeChange = (e) => {
 
   return (
     <MainLayout>
-      <div className="transactions-page">
-        <div className="transactions-top">
+      <div className="app-page transactions-page">
+        <div className="page-header transactions-top">
           <div>
-            <h1>Transactions</h1>
-            <p>Review and manage your financial asset movements.</p>
+            <h1 className="page-title">Transactions</h1>
+            <p className="page-subtitle">Review and manage your financial asset movements.</p>
           </div>
 
-          <div className="transactions-actions">
+          <div className="page-actions transactions-actions">
             <button
-              className="secondary-action"
+              className="btn btn-secondary secondary-action"
               onClick={() => {
                 setEditingId(null)
                 setActivePanel(activePanel === 'category' ? null : 'category')
@@ -258,7 +259,7 @@ const handleTypeChange = (e) => {
             </button>
 
             <button
-              className="primary-action"
+              className="btn btn-primary primary-action"
               onClick={() => {
                 setEditingId(null)
                 setForm(defaultForm)
@@ -273,14 +274,14 @@ const handleTypeChange = (e) => {
         </div>
 
         {activePanel === 'transaction' && (
-          <form className="floating-form-card" onSubmit={handleSubmitTransaction}>
-            <div className="form-title-row">
+          <form className="app-card app-card-p floating-form-card" onSubmit={handleSubmitTransaction}>
+            <div className="card-header form-title-row">
               <h2>{editingId ? 'Edit Transaction' : 'Add Transaction'}</h2>
 
               {editingId && (
                 <button
                   type="button"
-                  className="cancel-edit-btn"
+                  className="btn btn-secondary btn-sm cancel-edit-btn"
                   onClick={handleCancelEdit}
                 >
                   Cancel Edit
@@ -290,8 +291,8 @@ const handleTypeChange = (e) => {
 
             <div className="form-grid">
               <div>
-                <label>Description</label>
-                <input
+                <label className="form-label">Description</label>
+                <input className="form-control"
                   type="text"
                   name="description"
                   placeholder="Example: Coffee, Salary"
@@ -302,7 +303,7 @@ const handleTypeChange = (e) => {
               </div>
 
               <div>
-                <label>Type</label>
+                <label className="form-label">Type</label>
                 <select name="type" value={form.type} onChange={handleTypeChange} disabled={!!form.goal_id}>
                   <option value="income">Income / Pemasukan</option>
                   <option value="expense">Expense / Pengeluaran</option>
@@ -310,8 +311,8 @@ const handleTypeChange = (e) => {
               </div>
 
               <div>
-                <label>Amount</label>
-                <input
+                <label className="form-label">Amount</label>
+                <input className="form-control"
                   type="number"
                   name="amount"
                   placeholder="Example: 100000"
@@ -323,8 +324,8 @@ const handleTypeChange = (e) => {
 
 {!form.goal_id && (
   <div>
-    <label>Category</label>
-    <select
+    <label className="form-label">Category</label>
+    <select className="form-control"
       name="category_id"
       value={form.category_id}
       onChange={handleChange}
@@ -343,8 +344,8 @@ const handleTypeChange = (e) => {
 
 {form.goal_id && (
   <div>
-    <label>Category</label>
-    <input
+    <label className="form-label">Category</label>
+    <input className="form-control"
       type="text"
       value="Savings"
       disabled
@@ -353,8 +354,8 @@ const handleTypeChange = (e) => {
 )}
 
               <div>
-  <label>Allocate to Goal</label>
-  <select
+  <label className="form-label">Allocate to Goal</label>
+  <select className="form-control"
     name="goal_id"
     value={form.goal_id}
     onChange={handleChange}
@@ -370,8 +371,8 @@ const handleTypeChange = (e) => {
 </div>
 
               <div>
-                <label>Date</label>
-                <input
+                <label className="form-label">Date</label>
+                <input className="form-control"
                   type="date"
                   name="transaction_date"
                   value={form.transaction_date}
@@ -381,8 +382,8 @@ const handleTypeChange = (e) => {
               </div>
 
               <div>
-                <label>Notes</label>
-                <input
+                <label className="form-label">Notes</label>
+                <input className="form-control"
                   type="text"
                   name="notes"
                   placeholder="Optional notes"
@@ -392,20 +393,20 @@ const handleTypeChange = (e) => {
               </div>
             </div>
 
-            <button type="submit" className="submit-action">
+            <button type="submit" className="btn btn-primary btn-full submit-action">
               {editingId ? 'Update Transaction' : 'Save Transaction'}
             </button>
           </form>
         )}
 
         {activePanel === 'category' && (
-          <form className="floating-form-card" onSubmit={handleCreateCategory}>
+          <form className="app-card app-card-p floating-form-card" onSubmit={handleCreateCategory}>
             <h2>Create Category</h2>
 
             <div className="form-grid">
               <div>
-                <label>Category Name</label>
-                <input
+                <label className="form-label">Category Name</label>
+                <input className="form-control"
                   type="text"
                   name="name"
                   placeholder="Example: Coffee"
@@ -416,8 +417,8 @@ const handleTypeChange = (e) => {
               </div>
 
               <div>
-                <label>Type</label>
-                <select
+                <label className="form-label">Type</label>
+                <select className="form-control"
                   name="type"
                   value={categoryForm.type}
                   onChange={handleCategoryChange}
@@ -428,14 +429,14 @@ const handleTypeChange = (e) => {
               </div>
             </div>
 
-            <button type="submit" className="submit-action">
+            <button type="submit" className="btn btn-primary btn-full submit-action">
               Save Category
             </button>
           </form>
         )}
 
         <div className="transactions-overview">
-          <div className="filter-card">
+          <div className="app-card filter-card">
             <span className="filter-label">FILTERS:</span>
 
             <button
@@ -458,15 +459,15 @@ const handleTypeChange = (e) => {
             ))}
           </div>
 
-          <div className="summary-card">
+          <div className="app-card metric-card summary-card">
             <span>Monthly Outflow</span>
             <h2>Rp {monthlyOutflow.toLocaleString('id-ID')}</h2>
             <p>Based on recorded expenses</p>
           </div>
         </div>
 
-        <div className="transactions-table-card">
-          <table>
+        <div className="app-card table-card transactions-table-card">
+          <table className="app-table">
             <thead>
               <tr>
                 <th>Transaction</th>
@@ -508,7 +509,7 @@ const handleTypeChange = (e) => {
                     </td>
 
                     <td>
-                      <span className="category-badge">
+                      <span className="badge badge-neutral category-badge">
                         {item.category?.name || 'Uncategorized'}
                       </span>
                     </td>
@@ -545,14 +546,14 @@ const handleTypeChange = (e) => {
                     <td>
                       <div className="table-actions">
                         <button
-                          className="edit-btn"
+                          className="btn btn-secondary btn-sm edit-btn"
                           onClick={() => handleEditTransaction(item)}
                         >
                           Edit
                         </button>
 
                         <button
-                          className="delete-btn"
+                          className="btn btn-danger btn-sm delete-btn"
                           onClick={() => handleDeleteTransaction(item.id)}
                         >
                           Delete

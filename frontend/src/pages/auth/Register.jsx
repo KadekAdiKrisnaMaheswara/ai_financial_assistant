@@ -2,19 +2,16 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
-  Bot,
-  ChartNoAxesCombined,
   Eye,
   EyeOff,
   Lock,
   Mail,
   ShieldCheck,
-  Target,
   User,
-  Wallet,
 } from 'lucide-react'
 import api from '../../api/axios'
 import './auth.css'
+import logoAivest from '../../assets/logo-aivest.png'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -60,8 +57,8 @@ export default function Register() {
       <div className="auth-orb two"></div>
 
       <section className="auth-showcase">
-        <div className="auth-brand">
-          <div className="auth-logo">A</div>
+        <div className="landing-brand">
+          <img src={logoAivest} alt="AIVEST Logo" />
           <div>
             <h1>AIVEST</h1>
             <p>AI Financial Assistant</p>
@@ -74,40 +71,6 @@ export default function Register() {
           Create your account to track transactions, manage budgets, monitor
           goals, and unlock AI-based financial recommendations.
         </p>
-
-        <div className="auth-feature-list">
-          <div className="auth-feature">
-            <Wallet size={22} />
-            <div>
-              <h4>Budget Control</h4>
-              <p>Set limits and monitor overspending.</p>
-            </div>
-          </div>
-
-          <div className="auth-feature">
-            <Target size={22} />
-            <div>
-              <h4>Goal Tracking</h4>
-              <p>Track your savings target progress.</p>
-            </div>
-          </div>
-
-          <div className="auth-feature">
-            <Bot size={22} />
-            <div>
-              <h4>AI Recommendation</h4>
-              <p>Receive smart financial guidance.</p>
-            </div>
-          </div>
-
-          <div className="auth-feature">
-            <ChartNoAxesCombined size={22} />
-            <div>
-              <h4>Analytics</h4>
-              <p>Understand income and expenses better.</p>
-            </div>
-          </div>
-        </div>
       </section>
 
       <section className="auth-form-side">
@@ -202,16 +165,6 @@ export default function Register() {
           </div>
         </form>
       </section>
-
-      <footer className="auth-footer">
-        <span>© 2026 AIVEST. All rights reserved.</span>
-
-        <div>
-          <span>Privacy Policy</span>
-          <span>Terms of Service</span>
-          <span>Security</span>
-        </div>
-      </footer>
     </div>
   )
 }
