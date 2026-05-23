@@ -1,7 +1,11 @@
 import express from 'express'
 import prisma from '../prisma/client.js'
+import { generateResponse } from '../controllers/aiController.js'
 
 const router = express.Router()
+
+// AI Chat endpoint
+router.post('/chat', generateResponse)
 
 // GET CHAT SESSIONS
 router.get('/chat-sessions', async (req, res) => {

@@ -16,15 +16,16 @@ function AIAssistant() {
     },
   ]);
   const [inputValue, setInputValue] = useState('');
+  const [loading, setLoading] = useState(false);
   const chatEndRef = useRef(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const trimmed = inputValue.trim();
-    if (!trimmed) return;
+    if (!trimmed || loading) return;
 
     const userMessage = {
       id: Date.now(),
@@ -34,21 +35,48 @@ function AIAssistant() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
+    setLoading(true);
 
-    window.setTimeout(() => {
+    try {
+      const response = await fetch('http://localhost:5000/api/ai/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: trimmed,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Gagal mendapatkan respons dari AI');
+      }
+
+      const data = await response.json();
+      const aiMessage = {
+        id: Date.now() + 1,
+        role: 'assistant',
+        text: data.response || 'Maaf, saya tidak dapat memproses pertanyaan Anda.',
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error:', error);
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now() + 1,
           role: 'assistant',
-          text: 'Terima kasih. Saya sedang memproses jawaban untuk pertanyaan Anda. Silakan tunggu sebentar.',
+          text: 'Maaf, terjadi kesalahan. Silakan coba lagi nanti.',
         },
       ]);
-    }, 400);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !loading) {
       event.preventDefault();
       handleSend();
     }
@@ -96,6 +124,16 @@ function AIAssistant() {
                 </div>
               ))}
 
+              {loading && (
+                <div className="chat-bubble assistant">
+                  <div className="bubble-meta">
+                    <span>AIVEST</span>
+                    <span>AI Assistant</span>
+                  </div>
+                  <div className="loading-dots">Sedang memproses...</div>
+                </div>
+              )}
+
               <div ref={chatEndRef} />
             </div>
 
@@ -106,9 +144,10 @@ function AIAssistant() {
                 value={inputValue}
                 onChange={(event) => setInputValue(event.target.value)}
                 onKeyDown={handleKeyDown}
+                disabled={loading}
               />
-              <button type="button" onClick={handleSend}>
-                Kirim
+              <button type="button" onClick={handleSend} disabled={loading}>
+                {loading ? 'Mengirim...' : 'Kirim'}
               </button>
             </div>
           </section>
@@ -122,6 +161,7 @@ function AIAssistant() {
                     type="button"
                     key={prompt}
                     onClick={() => setInputValue(prompt)}
+                    disabled={loading}
                   >
                     {prompt}
                   </button>
