@@ -91,6 +91,50 @@
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
 }
 
+.bubble-content {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Formatted Message Styling */
+.formatted-message {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-paragraph {
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  color: inherit;
+  font-size: inherit;
+}
+
+.message-paragraph:last-of-type:not(:has(+ .expand-button)) {
+  margin-bottom: 0;
+}
+
+/* Expand Button Styling */
+.expand-button {
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border: none;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.expand-button:hover {
+  background: rgba(37, 99, 235, 0.2);
+  transform: translateY(-1px);
+}
+
 .chat-bubble.assistant {
   align-self: flex-start;
   background: #eff6ff;

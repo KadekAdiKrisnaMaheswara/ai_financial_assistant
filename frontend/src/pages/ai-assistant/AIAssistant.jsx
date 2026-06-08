@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import MainLayout from '../../components/layout/MainLayout';
+import { renderFormattedMessage } from '../../utils/formatChatMessage';
 import './AIAssistant.css';
 
 function AIAssistant() {
@@ -17,6 +18,7 @@ function AIAssistant() {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
+  const [expandedMessageId, setExpandedMessageId] = useState(null);
   const chatEndRef = useRef(null);
 
   useEffect(() => {
@@ -38,6 +40,13 @@ function AIAssistant() {
     setLoading(true);
 
     try {
+      const storedUser = localStorage.getItem('user');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      
+      if (!user || !user.id) {
+        throw new Error('User ID tidak ditemukan. Silakan login kembali.');
+      }
+
       const response = await fetch('http://localhost:5000/api/ai/chat', {
         method: 'POST',
         headers: {
@@ -45,6 +54,7 @@ function AIAssistant() {
         },
         body: JSON.stringify({
           message: trimmed,
+          user_id: user.id,
         }),
       });
 
@@ -67,7 +77,7 @@ function AIAssistant() {
         {
           id: Date.now() + 1,
           role: 'assistant',
-          text: 'Maaf, terjadi kesalahan. Silakan coba lagi nanti.',
+          text: `Maaf, terjadi kesalahan: ${error.message || 'Silakan coba lagi nanti.'}`,
         },
       ]);
     } finally {
@@ -88,6 +98,46 @@ function AIAssistant() {
     'Analisa pengeluaran saya bulan ini',
     'Tips invest jangka pendek',
   ];
+
+  // Render message dengan formatting yang rapi
+  const renderMessage = (message) => {
+    const isAssistant = message.role === 'assistant';
+    
+    if (!isAssistant) {
+      return message.text;
+    }
+
+    // Format assistant messages dengan paragraph breaks
+    const paragraphs = renderFormattedMessage(message.text);
+    const isLongMessage = paragraphs.length > 5;
+    const displayParagraphs = expandedMessageId === message.id 
+      ? paragraphs 
+      : paragraphs.slice(0, 4);
+
+    return (
+      <div className="formatted-message">
+        {displayParagraphs.map((para, idx) => (
+          <p key={idx} className="message-paragraph">{para}</p>
+        ))}
+        {isLongMessage && expandedMessageId !== message.id && (
+          <button 
+            className="expand-button"
+            onClick={() => setExpandedMessageId(message.id)}
+          >
+            Baca selengkapnya...
+          </button>
+        )}
+        {isLongMessage && expandedMessageId === message.id && (
+          <button 
+            className="expand-button"
+            onClick={() => setExpandedMessageId(null)}
+          >
+            Sembunyikan
+          </button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <MainLayout>
@@ -120,7 +170,9 @@ function AIAssistant() {
                     <span>{message.role === 'user' ? 'Anda' : 'AIVEST'}</span>
                     <span>{message.role === 'user' ? 'User' : 'AI Assistant'}</span>
                   </div>
-                  <div>{message.text}</div>
+                  <div className="bubble-content">
+                    {renderMessage(message)}
+                  </div>
                 </div>
               ))}
 
