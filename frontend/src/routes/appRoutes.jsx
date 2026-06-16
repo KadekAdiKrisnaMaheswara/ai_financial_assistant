@@ -19,7 +19,8 @@ const AppRoutes = () => {
     <Routes>
       <Route
         path="/"
-        element={token ? <Navigate to="/dashboard"  /> : <LandingPage />}
+        // element={token ? <Navigate to="/dashboard"  /> : <LandingPage />}
+        element={<LandingPage />}
       />
 
       <Route

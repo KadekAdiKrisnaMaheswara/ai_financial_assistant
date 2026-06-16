@@ -160,7 +160,7 @@ setForm({
 
     const payload = {
       category_id: form.category_id,
-      limit_amount: Number(form.limit_amount),
+      limit_amount: Number(String(form.limit_amount).replace(/[^\d]/g, '')),
       period: form.period,
       start_date: form.start_date,
       end_date: form.end_date,
