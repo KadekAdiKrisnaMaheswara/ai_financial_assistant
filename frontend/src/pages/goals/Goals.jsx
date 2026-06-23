@@ -43,26 +43,33 @@ export default function Goals() {
   }, [fetchGoals, token])
 
   const formatRupiah = (value) => {
-  const numberString = value.replace(/[^\d]/g, '')
+    const numberString = String(value).replace(/[^\d]/g, '')
 
-  if (!numberString) return ''
+    if (!numberString) return ''
 
-  return new Intl.NumberFormat('id-ID').format(numberString)
-}
-
-  const handleChange = (e) => {
-if (name === 'amount') {
-  const rawValue = value.replace(/[^\d]/g, '')
-
-  setForm({
-    ...form,
-    amount: rawValue,
-  })
-
-  return
-}
+    return new Intl.NumberFormat('id-ID').format(Number(numberString))
   }
 
+const handleChange = (e) => {
+  const { name, value } = e.target
+
+  if (name === 'target_amount') {
+    const rawValue = value.replace(/[^\d]/g, '')
+
+    setForm((prev) => ({
+      ...prev,
+      target_amount: rawValue,
+    }))
+
+    return
+  }
+
+  setForm((prev) => ({
+    ...prev,
+    [name]: value,
+  }))
+}
+  
   const resetForm = () => {
     setForm({
       name: '',

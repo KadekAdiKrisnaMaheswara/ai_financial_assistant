@@ -180,7 +180,7 @@ export const generateResponse = async (req, res) => {
     systemInstructions += `\n\n[REMINDER KETAT]\nJika pertanyaan user SAMA SEKALI TIDAK TERKAIT dengan: analisis data keuangannya, manajemen pengeluaran, perencanaan budget, tabungan, atau investasi emas - TOLAK pertanyaan tersebut dengan sopan dan arahkan kembali ke topik finansial.`;
 
     // 5. Konfigurasi dan Pemanggilan Gemini API
-    const modelName = 'gemini-2.5-flash'; 
+    const modelName = 'gemini-3.5-flash'; 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
     const response = await fetch(apiUrl, {
