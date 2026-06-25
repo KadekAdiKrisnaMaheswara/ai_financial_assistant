@@ -167,10 +167,6 @@
   align-items: center;
 }
 
-.receipt-upload-actions input {
-  min-width: 260px;
-}
-
 @media (max-width: 768px) {
   .receipt-upload-box,
   .receipt-upload-actions {
@@ -549,11 +545,164 @@
   margin: 8px 0;
 }
 
-.transaction-filter-panel .form-control {
-  height: 40px;
-  font-size: 14px;
+/* ================================
+   TRANSACTIONS FORM SPACING
+   Menyamakan jarak form expand/collapse dengan halaman lain
+================================ */
+.transactions-page .floating-form-card {
+  margin-bottom: 30px;
+  border-radius: 28px;
 }
 
+.transactions-page .form-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.transactions-page .form-title-row h2 {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.6px;
+}
+
+.transactions-page .submit-action {
+  margin-top: 4px;
+}
+
+.transactions-page .cancel-edit-btn {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .transactions-page .form-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .transactions-page .cancel-edit-btn {
+    width: 100%;
+  }
+}
+
+/* ================================
+   TRANSACTIONS FORM ANIMATION
+   Disamakan dengan animasi form Budgets
+================================ */
 .transactions-page .floating-form-card {
-  margin-bottom: 30px !important;
+  margin-bottom: 30px;
+  border-radius: 28px;
+  animation: transactionFormFade 0.25s ease;
+}
+
+@keyframes transactionFormFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================
+   CUSTOM RECEIPT UPLOAD UI
+================================ */
+.receipt-upload-box {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.4fr);
+  gap: 18px;
+  align-items: center;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px dashed var(--border-default);
+  border-radius: 20px;
+  background: #f8faff;
+}
+
+.receipt-upload-text {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.receipt-upload-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  gap: 12px;
+  align-items: center;
+}
+
+.custom-file-upload {
+  width: 100%;
+  height: 54px;
+  padding: 0 8px 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  background: #ffffff;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.custom-file-upload input {
+  display: none;
+}
+
+.custom-file-text {
+  min-width: 0;
+  flex: 1;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-file-button {
+  flex-shrink: 0;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: #eef4ff;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.receipt-scan-btn {
+  height: 54px;
+  border-radius: 16px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .receipt-upload-box {
+    grid-template-columns: 1fr;
+  }
+
+  .receipt-upload-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .receipt-scan-btn {
+    width: 100%;
+  }
 }

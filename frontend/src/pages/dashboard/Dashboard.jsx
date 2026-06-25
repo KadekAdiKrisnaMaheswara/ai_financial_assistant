@@ -83,6 +83,55 @@ const fetchTransactions = useCallback(async () => {
 
   const totalBalance = totalIncome - totalExpenses
 
+  const currentMonthStats = useMemo(() => {
+    const now = new Date()
+    const currentMonth = now.getMonth()
+    const currentYear = now.getFullYear()
+
+    let currentMonthIncome = 0
+    let currentMonthExpenses = 0
+    const monthlyIncomeMap = Array(12).fill(0)
+
+    transactions.forEach((item) => {
+      if (!item.transaction_date) return
+
+      const date = new Date(item.transaction_date)
+      const amount = Number(item.amount || 0)
+
+      if (Number.isNaN(date.getTime())) return
+
+      if (date.getFullYear() === currentYear && item.type === 'income') {
+        monthlyIncomeMap[date.getMonth()] += amount
+      }
+
+      if (
+        date.getMonth() === currentMonth &&
+        date.getFullYear() === currentYear
+      ) {
+        if (item.type === 'income') {
+          currentMonthIncome += amount
+        }
+
+        if (item.type === 'expense') {
+          currentMonthExpenses += amount
+        }
+      }
+    })
+
+    const highestMonthlyIncome = Math.max(...monthlyIncomeMap, 0)
+
+    const incomeProgress =
+      highestMonthlyIncome > 0
+        ? Math.min((currentMonthIncome / highestMonthlyIncome) * 100, 100)
+        : 0
+
+    return {
+      currentMonthIncome,
+      currentMonthExpenses,
+      incomeProgress: Math.round(incomeProgress),
+    }
+  }, [transactions])
+
   const monthlyChartData = useMemo(() => {
     const months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -427,15 +476,25 @@ const fetchTransactions = useCallback(async () => {
             </div>
 
             <div className="stat-value-row">
-              <h2>{formatCurrency(totalIncome)}</h2>
-              <strong className="positive">+ Income</strong>
+              <h2>{formatCurrency(currentMonthStats.currentMonthIncome)}</h2>
+              <strong className={currentMonthStats.currentMonthIncome > 0 ? 'positive' : 'neutral'}>
+                {currentMonthStats.currentMonthIncome > 0 ? '+ Income' : 'No income yet'}
+              </strong>
             </div>
 
-            <div className="stat-progress">
-              <div style={{ width: '85%' }}></div>
+            <div
+              className={`stat-progress ${
+                currentMonthStats.currentMonthIncome > 0 ? 'income-active' : 'income-empty'
+              }`}
+            >
+              <div style={{ width: `${currentMonthStats.incomeProgress}%` }}></div>
             </div>
 
-            <p>Income recorded from all transactions</p>
+            <p>
+              {currentMonthStats.currentMonthIncome > 0
+                ? `${currentMonthStats.incomeProgress}% of your highest monthly income this year`
+                : 'No income recorded for this month yet'}
+            </p>
           </div>
 
           <div className="card premium-stat">
@@ -446,14 +505,23 @@ const fetchTransactions = useCallback(async () => {
 
             <div className="stat-value-row">
               <h2>{formatCurrency(totalExpenses)}</h2>
-              <strong className="negative">- Expense</strong>
+              <strong className={totalExpenses > 0 ? 'negative' : 'neutral'}>
+                {totalExpenses > 0 ? '- Expense' : 'No expense yet'}
+              </strong>
             </div>
 
             <div className="stat-divider"></div>
 
             <div className="stat-footer">
-              <span className="limit-badge">Expense Activity</span>
-              <span>Managed spending</span>
+              <span className={`limit-badge ${totalExpenses > 0 ? 'danger' : 'neutral'}`}>
+                {totalExpenses > 0 ? 'Expense Activity' : 'No Activity'}
+              </span>
+
+              <span>
+                {totalExpenses > 0
+                  ? `${formatCurrency(currentMonthStats.currentMonthExpenses)} spent this month`
+                  : 'Start adding expenses to track spending'}
+              </span>
             </div>
           </div>
         </div>

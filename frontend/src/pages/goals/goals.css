@@ -149,10 +149,69 @@
   }
 }
 
-.goals-page .floating-form-card {
-  margin-bottom: 42px !important;
+/* ================================
+   GOALS FORM SPACING
+   Menyamakan jarak form expand/collapse dengan halaman lain
+================================ */
+.goals-page .goal-form-card {
+  margin-bottom: 30px;
+  border-radius: 28px;
+  animation: goalFormFade 0.25s ease;
+}
+
+@keyframes goalFormFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .goals-page .goals-grid {
-  margin-top: 42px !important;
+  margin-top: 0;
+}
+
+.goal-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.goal-form-header h2 {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.6px;
+}
+
+.goal-form-grid {
+  margin-bottom: 24px;
+}
+
+.goal-submit-btn {
+  margin-top: 4px;
+}
+
+.goal-cancel-btn {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .goal-form-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .goal-cancel-btn {
+    width: 100%;
+  }
 }

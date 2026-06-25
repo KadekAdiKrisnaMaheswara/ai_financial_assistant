@@ -257,16 +257,14 @@ export default function Transactions() {
         description: parsed.description || form.description,
         amount: parsed.amount ? String(parsed.amount) : form.amount,
         type: parsed.type || 'expense',
-        transaction_date: parsed.transaction_date
-          ? new Date(parsed.transaction_date).toISOString().split('T')[0]
-          : form.transaction_date,
-        notes: parsed.notes || form.notes,
+        transaction_date: parsed.transaction_date || form.transaction_date,
+        notes: parsed.notes || 'Scanned from receipt',
         goal_id: '',
         category_id: '',
       })
 
       alert(
-        'Struk berhasil discan. Silakan pilih kategori lalu simpan transaksi.'
+        'Receipt scanned successfully. Please review the details before saving the transaction.'
       )
     } catch (error) {
       console.log(error)
@@ -401,7 +399,7 @@ export default function Transactions() {
                 setActivePanel(activePanel === 'category' ? null : 'category')
               }}
             >
-              + Create Category
+              {activePanel === 'category' ? 'Close Form' : '+ Create Category'}
             </button>
 
             <button
@@ -414,7 +412,9 @@ export default function Transactions() {
                 )
               }}
             >
-              + Add Transaction
+              {activePanel === 'transaction' && !editingId
+                ? 'Close Form'
+                : '+ Add Transaction'}
             </button>
           </div>
         </div>
@@ -443,27 +443,34 @@ export default function Transactions() {
                 <div>
                   <label className="form-label">Upload Receipt</label>
                   <p className="receipt-upload-text">
-                    Upload struk belanja untuk mengisi transaksi otomatis.
+                    Upload your receipt to automatically fill in the transaction details.
                   </p>
                 </div>
 
-                <div className="receipt-upload-actions">
-                  <input
-                    className="form-control"
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/png"
-                    onChange={(e) => setReceiptFile(e.target.files[0])}
-                  />
+<div className="receipt-upload-actions">
+  <label className="custom-file-upload">
+    <input
+      type="file"
+      accept="image/jpeg,image/jpg,image/png"
+      onChange={(e) => setReceiptFile(e.target.files[0])}
+    />
 
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={handleScanReceipt}
-                    disabled={isScanningReceipt}
-                  >
-                    {isScanningReceipt ? 'Scanning...' : 'Scan Receipt'}
-                  </button>
-                </div>
+    <span className="custom-file-text">
+      {receiptFile ? receiptFile.name : 'No receipt selected'}
+    </span>
+
+    <span className="custom-file-button">Choose File</span>
+  </label>
+
+  <button
+    type="button"
+    className="btn btn-secondary receipt-scan-btn"
+    onClick={handleScanReceipt}
+    disabled={isScanningReceipt}
+  >
+    {isScanningReceipt ? 'Scanning...' : 'Scan Receipt'}
+  </button>
+</div>
               </div>
             )}
 

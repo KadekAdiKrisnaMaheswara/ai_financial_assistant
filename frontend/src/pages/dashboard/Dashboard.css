@@ -33,6 +33,10 @@
   color: #ef4444;
 }
 
+.neutral {
+  color: #94a3b8;
+}
+
 /* =========================================================
    HEADER DASHBOARD
    Bagian judul, deskripsi, filter realtime, dan tombol export
@@ -283,6 +287,16 @@
 .stat-progress div {
   height: 100%;
   background: linear-gradient(90deg, #2563eb, #60a5fa);
+  border-radius: inherit;
+  transition: width 0.35s ease;
+}
+
+.stat-progress.income-active div {
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+}
+
+.stat-progress.income-empty div {
+  background: #cbd5e1;
 }
 
 .premium-stat p {
@@ -321,6 +335,16 @@
   align-items: center;
   justify-content: center;
   white-space: nowrap;
+}
+
+.limit-badge.danger {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.limit-badge.neutral {
+  background: #f1f5f9;
+  color: #64748b;
 }
 
 /* =========================================================

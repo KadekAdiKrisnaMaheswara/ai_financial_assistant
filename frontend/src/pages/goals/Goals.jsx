@@ -53,12 +53,12 @@ export default function Goals() {
 const handleChange = (e) => {
   const { name, value } = e.target
 
-  if (name === 'target_amount') {
+  if (name === 'target_amount' || name === 'current_amount') {
     const rawValue = value.replace(/[^\d]/g, '')
 
     setForm((prev) => ({
       ...prev,
-      target_amount: rawValue,
+      [name]: rawValue,
     }))
 
     return
@@ -87,13 +87,13 @@ const handleChange = (e) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const payload = {
-      name: form.name,
-      target_amount: Number(form.target_amount),
-      current_amount: Number(form.current_amount || 0),
-      deadline: useDeadline ? form.deadline : null,
-      status: form.status,
-    }
+const payload = {
+  name: form.name,
+  target_amount: Number(String(form.target_amount).replace(/[^\d]/g, '')),
+  current_amount: Number(String(form.current_amount || 0).replace(/[^\d]/g, '')),
+  deadline: useDeadline ? form.deadline : null,
+  status: form.status,
+}
 
     try {
       if (editingId) {
@@ -159,15 +159,29 @@ const handleChange = (e) => {
             <p className="page-subtitle">Track your savings targets and monitor progress.</p>
           </div>
 
-          <button
-            className="btn btn-primary goal-btn"
-            onClick={() => {
-              setShowForm(!showForm)
-              setEditingId(null)
-            }}
-          >
-            + Create Goal
-          </button>
+<button
+  className="btn btn-primary goal-btn"
+  type="button"
+  onClick={() => {
+    if (showForm && !editingId) {
+      resetForm()
+      return
+    }
+
+    setEditingId(null)
+    setUseDeadline(false)
+    setForm({
+      name: '',
+      target_amount: '',
+      current_amount: '',
+      deadline: '',
+      status: 'active',
+    })
+    setShowForm(true)
+  }}
+>
+  {showForm && !editingId ? 'Close Form' : '+ Create Goal'}
+</button>
         </div>
 
         {showForm && (
@@ -199,25 +213,27 @@ const handleChange = (e) => {
 
               <div>
                 <label className="form-label">Target Amount</label>
-                <input className="form-control"
-                  type="text"
-                  name="target_amount"
-                  placeholder="Example: Rp 10.000.000"
-                  value={form.target_amount ? formatRupiah(form.target_amount) : ''}
-                  onChange={handleChange}
-                  required
-                />
+<input
+  className="form-control"
+  type="text"
+  name="target_amount"
+  placeholder="Example: Rp 10.000.000"
+  value={form.target_amount ? `Rp ${formatRupiah(form.target_amount)}` : ''}
+  onChange={handleChange}
+  required
+/>
               </div>
 
               <div>
                 <label className="form-label">Current Amount</label>
-                <input className="form-control"
-                  type="number"
-                  name="current_amount"
-                  placeholder="Example: 2500000"
-                  value={form.current_amount}
-                  onChange={handleChange}
-                />
+<input
+  className="form-control"
+  type="text"
+  name="current_amount"
+  placeholder="Example: Rp 2.500.000"
+  value={form.current_amount ? `Rp ${formatRupiah(form.current_amount)}` : ''}
+  onChange={handleChange}
+/>
               </div>
 
 <div>

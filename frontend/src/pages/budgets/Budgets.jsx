@@ -21,6 +21,7 @@ export default function Budgets() {
   const [categories, setCategories] = useState([])
   const [transactions, setTransactions] = useState([])
   const [editingId, setEditingId] = useState(null)
+  const [showForm, setShowForm] = useState(false)
 
   const [form, setForm] = useState({
     category_id: '',
@@ -32,11 +33,13 @@ export default function Budgets() {
 
   const token = localStorage.getItem('token')
 
-  const authHeader = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
+  const authHeader = useMemo(() => {
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  }, [token])
 
   const fetchBudgets = useCallback(async () => {
     try {
@@ -45,7 +48,7 @@ export default function Budgets() {
     } catch (error) {
       console.log(error)
     }
-  }, [token])
+  }, [authHeader])
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -54,7 +57,7 @@ export default function Budgets() {
     } catch (error) {
       console.log(error)
     }
-  }, [token])
+  }, [authHeader])
 
   const fetchTransactions = useCallback(async () => {
     try {
@@ -63,7 +66,7 @@ export default function Budgets() {
     } catch (error) {
       console.log(error)
     }
-  }, [token])
+  }, [authHeader])
 
   useEffect(() => {
     if (token) {
@@ -74,44 +77,51 @@ export default function Budgets() {
   }, [fetchBudgets, fetchCategories, fetchTransactions, token])
 
   const formatRupiah = (value) => {
-  const numberString = value.replace(/[^\d]/g, '')
+    const numberString = String(value).replace(/[^\d]/g, '')
 
-  if (!numberString) return ''
+    if (!numberString) return ''
 
-  return new Intl.NumberFormat('id-ID').format(numberString)
-}
+    return new Intl.NumberFormat('id-ID').format(Number(numberString))
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
-if (name === 'amount') {
-  const rawValue = value.replace(/[^\d]/g, '')
 
-  setForm({
-    ...form,
-    amount: rawValue,
-  })
+    if (name === 'limit_amount') {
+      const rawValue = value.replace(/[^\d]/g, '')
 
-  return
-}
+      setForm((prev) => ({
+        ...prev,
+        limit_amount: rawValue,
+      }))
 
-setForm({
-  ...form,
-  [name]: value,
-})
-
-    if (name === 'start_date') {
-      setForm({
-        ...form,
-        start_date: value,
-        end_date: calculateEndDate(value, form.period),
-      })
       return
     }
 
-    setForm({
-      ...form,
+    if (name === 'start_date') {
+      setForm((prev) => ({
+        ...prev,
+        start_date: value,
+        end_date: calculateEndDate(value, prev.period),
+      }))
+
+      return
+    }
+
+    if (name === 'period') {
+      setForm((prev) => ({
+        ...prev,
+        period: value,
+        end_date: calculateEndDate(prev.start_date, value),
+      }))
+
+      return
+    }
+
+    setForm((prev) => ({
+      ...prev,
       [name]: value,
-    })
+    }))
   }
 
   const calculateSpent = (budget) => {
@@ -153,6 +163,26 @@ setForm({
       start_date: today,
       end_date: calculateEndDate(today, 'monthly'),
     })
+
+    setEditingId(null)
+    setShowForm(false)
+  }
+
+  const handleOpenCreateForm = () => {
+    if (showForm && !editingId) {
+      setShowForm(false)
+      return
+    }
+
+    setEditingId(null)
+    setForm({
+      category_id: '',
+      limit_amount: '',
+      period: 'monthly',
+      start_date: today,
+      end_date: calculateEndDate(today, 'monthly'),
+    })
+    setShowForm(true)
   }
 
   const handleSubmit = async (e) => {
@@ -176,7 +206,6 @@ setForm({
       }
 
       resetForm()
-      setEditingId(null)
       fetchBudgets()
     } catch (error) {
       console.log(error)
@@ -186,6 +215,7 @@ setForm({
 
   const handleEdit = (budget) => {
     setEditingId(budget.id)
+    setShowForm(true)
 
     setForm({
       category_id: budget.category_id,
@@ -219,7 +249,6 @@ setForm({
   }
 
   const handleCancelEdit = () => {
-    setEditingId(null)
     resetForm()
   }
 
@@ -234,9 +263,19 @@ setForm({
             </p>
           </div>
 
-          <div className="app-card budget-summary">
-            <span>Total Budget</span>
-            <strong>Rp {totalBudget.toLocaleString('id-ID')}</strong>
+          <div className="budget-header-actions">
+            <div className="app-card budget-summary">
+              <span>Total Budget</span>
+              <strong>Rp {totalBudget.toLocaleString('id-ID')}</strong>
+            </div>
+
+            <button
+              className="btn btn-primary budget-create-btn"
+              type="button"
+              onClick={handleOpenCreateForm}
+            >
+              {showForm && !editingId ? 'Close Form' : '+ Create Budget'}
+            </button>
           </div>
         </div>
 
@@ -260,97 +299,109 @@ setForm({
           </div>
         </div>
 
-        <form className="app-card app-card-p budget-form-card" onSubmit={handleSubmit}>
-          <div className="card-header budget-form-header">
-            <h2>{editingId ? 'Edit Budget' : 'Create Budget'}</h2>
+        {showForm && (
+          <form
+            className="app-card app-card-p budget-form-card"
+            onSubmit={handleSubmit}
+          >
+            <div className="card-header budget-form-header">
+              <h2>{editingId ? 'Edit Budget' : 'Create Budget'}</h2>
 
-            {editingId && (
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm cancel-budget-btn"
-                onClick={handleCancelEdit}
-              >
-                Cancel Edit
-              </button>
-            )}
-          </div>
-
-          <div className="form-grid budget-form-grid">
-            <div>
-              <label className="form-label">Category</label>
-              <select
-                className="form-control"
-                name="category_id"
-                value={form.category_id}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select expense category</option>
-
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+              {editingId && (
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm cancel-budget-btn"
+                  onClick={handleCancelEdit}
+                >
+                  Cancel Edit
+                </button>
+              )}
             </div>
 
-            <div>
-              <label className="form-label">Limit Amount</label>
-              <input
-                className="form-control"
-                type="text"
-                name="limit_amount"
-                placeholder="Example: Rp 100.000"
-                value={form.limit_amount ? formatRupiah(form.limit_amount) : ''}
-                onChange={handleChange}
-                required
-              />
+            <div className="form-grid budget-form-grid">
+              <div>
+                <label className="form-label">Category</label>
+                <select
+                  className="form-control"
+                  name="category_id"
+                  value={form.category_id}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select expense category</option>
+
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="form-label">Limit Amount</label>
+                <input
+                  className="form-control"
+                  type="text"
+                  name="limit_amount"
+                  placeholder="Example: Rp 100.000"
+                  value={
+                    form.limit_amount
+                      ? `Rp ${formatRupiah(form.limit_amount)}`
+                      : ''
+                  }
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="form-label">Period</label>
+                <select
+                  className="form-control"
+                  name="period"
+                  value={form.period}
+                  onChange={handleChange}
+                >
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="form-label">Start Date</label>
+                <input
+                  className="form-control"
+                  type="date"
+                  name="start_date"
+                  value={form.start_date}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="form-label">End Date</label>
+                <input
+                  className="form-control"
+                  type="date"
+                  name="end_date"
+                  value={form.end_date}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="form-label">Period</label>
-              <select
-                className="form-control"
-                name="period"
-                value={form.period}
-                onChange={handleChange}
-              >
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="form-label">Start Date</label>
-              <input
-                className="form-control"
-                type="date"
-                name="start_date"
-                value={form.start_date}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="form-label">End Date</label>
-              <input
-                className="form-control"
-                type="date"
-                name="end_date"
-                value={form.end_date}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <button className="btn btn-primary btn-full budget-submit-btn" type="submit">
-            {editingId ? 'Update Budget' : 'Save Budget'}
-          </button>
-        </form>
+            <button
+              className="btn btn-primary btn-full budget-submit-btn"
+              type="submit"
+            >
+              {editingId ? 'Update Budget' : 'Save Budget'}
+            </button>
+          </form>
+        )}
 
         <div className="budget-table-card app-card">
           <div className="budget-table-header">
@@ -358,109 +409,120 @@ setForm({
             <span>{budgets.length} budgets</span>
           </div>
 
-<div className="budget-list-wrapper">
-  {budgets.length === 0 ? (
-    <div className="empty-budget">No budgets yet.</div>
-  ) : (
-    budgets.map((budget) => {
-      const spent = calculateSpent(budget)
-      const limit = Number(budget.limit_amount)
-      const rawPercentage = limit > 0 ? (spent / limit) * 100 : 0
-      const percentage = Math.min(rawPercentage, 100)
-      const isOverBudget = spent > limit
+          <div className="budget-list-wrapper">
+            {budgets.length === 0 ? (
+              <div className="empty-budget">No budgets yet.</div>
+            ) : (
+              budgets.map((budget) => {
+                const spent = calculateSpent(budget)
+                const limit = Number(budget.limit_amount)
+                const rawPercentage = limit > 0 ? (spent / limit) * 100 : 0
+                const percentage = Math.min(rawPercentage, 100)
+                const isOverBudget = spent > limit
 
-      return (
-        <div className="budget-list-row" key={budget.id}>
-          <div className="budget-main-info">
-            <span className="budget-category-badge">
-              {budget.category?.name || 'Uncategorized'}
-            </span>
+                return (
+                  <div className="budget-list-row" key={budget.id}>
+                    <div className="budget-main-info">
+                      <span className="budget-category-badge">
+                        {budget.category?.name || 'Uncategorized'}
+                      </span>
 
-            <div>
-              <h4>{budget.period}</h4>
-              <p>
-                {new Date(budget.start_date).toLocaleDateString('id-ID')} -{' '}
-                {new Date(budget.end_date).toLocaleDateString('id-ID')}
-              </p>
-            </div>
+                      <div>
+                        <h4>{budget.period}</h4>
+                        <p>
+                          {new Date(budget.start_date).toLocaleDateString(
+                            'id-ID'
+                          )}{' '}
+                          -{' '}
+                          {new Date(budget.end_date).toLocaleDateString(
+                            'id-ID'
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="budget-money-info">
+                      <div>
+                        <span>Limit</span>
+                        <strong>Rp {limit.toLocaleString('id-ID')}</strong>
+                      </div>
+
+                      <div>
+                        <span>Spent</span>
+                        <strong>Rp {spent.toLocaleString('id-ID')}</strong>
+                      </div>
+                    </div>
+
+                    <div className="budget-progress-area">
+                      <div className="budget-progress-top">
+                        <span>Progress</span>
+                        <strong
+                          className={
+                            isOverBudget
+                              ? 'danger'
+                              : percentage >= 75
+                                ? 'warning'
+                                : 'safe'
+                          }
+                        >
+                          {isOverBudget
+                            ? `Over Rp ${(spent - limit).toLocaleString(
+                                'id-ID'
+                              )}`
+                            : `${Math.round(percentage)}%`}
+                        </strong>
+                      </div>
+
+                      <div className="budget-progress-track">
+                        <div
+                          className={`budget-progress-fill ${
+                            percentage >= 100
+                              ? 'danger'
+                              : percentage >= 75
+                                ? 'warning'
+                                : ''
+                          }`}
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div className="budget-row-actions">
+                      <span
+                        className={
+                          isOverBudget
+                            ? 'budget-status danger'
+                            : percentage >= 75
+                              ? 'budget-status warning'
+                              : 'budget-status safe'
+                        }
+                      >
+                        {isOverBudget
+                          ? 'Over'
+                          : percentage >= 75
+                            ? 'Warning'
+                            : 'Safe'}
+                      </span>
+
+                      <button
+                        className="btn btn-secondary btn-sm budget-edit-btn"
+                        onClick={() => handleEdit(budget)}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        className="btn btn-danger btn-sm budget-delete-btn"
+                        onClick={() => handleDelete(budget.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )
+              })
+            )}
           </div>
-
-          <div className="budget-money-info">
-            <div>
-              <span>Limit</span>
-              <strong>Rp {limit.toLocaleString('id-ID')}</strong>
-            </div>
-
-            <div>
-              <span>Spent</span>
-              <strong>Rp {spent.toLocaleString('id-ID')}</strong>
-            </div>
-          </div>
-
-          <div className="budget-progress-area">
-            <div className="budget-progress-top">
-              <span>Progress</span>
-              <strong
-                className={
-                  isOverBudget
-                    ? 'danger'
-                    : percentage >= 75
-                      ? 'warning'
-                      : 'safe'
-                }
-              >
-                {isOverBudget
-                  ? `Over Rp ${(spent - limit).toLocaleString('id-ID')}`
-                  : `${Math.round(percentage)}%`}
-              </strong>
-            </div>
-
-            <div className="budget-progress-track">
-              <div
-                className={`budget-progress-fill ${
-                  percentage >= 100
-                    ? 'danger'
-                    : percentage >= 75
-                      ? 'warning'
-                      : ''
-                }`}
-                style={{ width: `${percentage}%` }}
-              ></div>
-            </div>
-          </div>
-
-          <div className="budget-row-actions">
-            <span
-              className={
-                isOverBudget
-                  ? 'budget-status danger'
-                  : percentage >= 75
-                    ? 'budget-status warning'
-                    : 'budget-status safe'
-              }
-            >
-              {isOverBudget ? 'Over' : percentage >= 75 ? 'Warning' : 'Safe'}
-            </span>
-
-            <button
-              className="btn btn-secondary btn-sm budget-edit-btn"
-              onClick={() => handleEdit(budget)}
-            >
-              Edit
-            </button>
-
-            <button
-              className="btn btn-danger btn-sm budget-delete-btn"
-              onClick={() => handleDelete(budget.id)}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      )
-    })
-  )}
-</div>
         </div>
       </div>
     </MainLayout>

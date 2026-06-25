@@ -1,7 +1,53 @@
-.budget-summary {
-  min-width: 230px;
+.budgets-page {
+  width: 100%;
 }
 
+/* ================================
+   HEADER
+================================ */
+.budgets-header {
+  align-items: flex-start;
+}
+
+.budget-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.budget-summary {
+  min-width: 230px;
+  padding: 18px 22px;
+  border-radius: 20px;
+}
+
+.budget-summary span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.budget-summary strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.budget-create-btn {
+  height: 52px;
+  padding: 0 24px;
+  border-radius: 16px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* ================================
+   OVERVIEW CARDS
+================================ */
 .budget-overview {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -9,6 +55,83 @@
   margin-bottom: 28px;
 }
 
+.budget-metric-card {
+  min-height: 150px;
+}
+
+.budget-metric-card span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.budget-metric-card h2 {
+  margin: 10px 0 6px;
+  font-size: 30px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.8px;
+}
+
+.budget-metric-card p {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* ================================
+   FORM
+================================ */
+.budget-form-card {
+  margin-bottom: 30px;
+  border-radius: 28px;
+  animation: budgetFormFade 0.25s ease;
+}
+
+.budget-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.budget-form-header h2 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.6px;
+}
+
+.budget-form-grid {
+  margin-bottom: 24px;
+}
+
+.budget-submit-btn {
+  margin-top: 4px;
+}
+
+.cancel-budget-btn {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+@keyframes budgetFormFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================
+   TABLE CARD
+================================ */
 .budget-table-card {
   padding: 34px;
   border-radius: 28px;
@@ -20,12 +143,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   margin-bottom: 28px;
 }
 
 .budget-table-header h2 {
   font-size: 28px;
   font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.7px;
 }
 
 .budget-table-header span {
@@ -33,7 +159,9 @@
   border-radius: 999px;
   background: #eef4ff;
   color: var(--color-primary);
+  font-size: 13px;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .budget-list-wrapper {
@@ -42,15 +170,23 @@
   gap: 18px;
 }
 
+/* ================================
+   BUDGET ROW
+================================ */
 .budget-list-row {
   display: grid;
-  grid-template-columns: minmax(190px, 1.1fr) minmax(140px, 0.8fr) minmax(140px, 0.8fr) minmax(220px, 1.2fr) auto;
+  grid-template-columns:
+    minmax(190px, 1.1fr)
+    minmax(140px, 0.8fr)
+    minmax(140px, 0.8fr)
+    minmax(220px, 1.2fr)
+    auto;
   gap: 20px;
   align-items: center;
   padding: 22px 24px;
   border: 1px solid #e5eaf3;
   border-radius: 24px;
-  background: #fff;
+  background: #ffffff;
   transition: 0.2s ease;
 }
 
@@ -68,7 +204,7 @@
 
 .budget-category-badge {
   width: fit-content;
-  max-width: 140px;
+  max-width: 150px;
   padding: 8px 14px;
   border-radius: 999px;
   background: #f1f5f9;
@@ -82,36 +218,40 @@
 }
 
 .budget-main-info h4 {
+  margin: 0;
   font-size: 15px;
   font-weight: 800;
+  color: #0f172a;
   text-transform: capitalize;
-  margin: 0;
 }
 
 .budget-main-info p {
-  font-size: 13px;
-  color: #64748b;
-  line-height: 1.35;
   margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: #64748b;
 }
 
+/* ================================
+   MONEY INFO
+================================ */
 .budget-money-info {
   display: contents;
 }
 
 .budget-money-info div {
+  min-width: 0;
   padding: 14px 16px;
   border-radius: 16px;
   background: #f8fafc;
-  min-width: 0;
 }
 
 .budget-money-info span {
   display: block;
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 700;
   margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
 }
 
 .budget-money-info strong {
@@ -124,6 +264,9 @@
   text-overflow: ellipsis;
 }
 
+/* ================================
+   PROGRESS
+================================ */
 .budget-progress-area {
   min-width: 0;
 }
@@ -137,10 +280,10 @@
 }
 
 .budget-progress-top span {
-  font-size: 13px;
-  color: #64748b;
-  font-weight: 700;
   flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
 }
 
 .budget-progress-top strong {
@@ -167,8 +310,8 @@
 .budget-progress-track {
   width: 100%;
   height: 8px;
-  background: #e5e7eb;
   border-radius: 999px;
+  background: #e5e7eb;
   overflow: hidden;
 }
 
@@ -176,6 +319,7 @@
   height: 100%;
   border-radius: 999px;
   background: #2563eb;
+  transition: width 0.3s ease;
 }
 
 .budget-progress-fill.warning {
@@ -186,6 +330,9 @@
   background: #ef4444;
 }
 
+/* ================================
+   ACTIONS
+================================ */
 .budget-row-actions {
   display: flex;
   align-items: center;
@@ -223,6 +370,7 @@
   height: 40px;
   padding: 0 18px;
   border-radius: 14px;
+  font-weight: 800;
   flex-shrink: 0;
 }
 
@@ -231,6 +379,9 @@
   color: #ef4444;
 }
 
+/* ================================
+   EMPTY STATE
+================================ */
 .empty-budget {
   padding: 42px;
   text-align: center;
@@ -241,6 +392,9 @@
   background: #f8fafc;
 }
 
+/* ================================
+   RESPONSIVE
+================================ */
 @media (max-width: 1300px) {
   .budget-list-row {
     grid-template-columns: 1fr;
@@ -260,12 +414,32 @@
 }
 
 @media (max-width: 1100px) {
+  .budgets-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .budget-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .budget-overview {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
+  .budget-header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .budget-summary,
+  .budget-create-btn {
+    width: 100%;
+  }
+
   .budget-table-card {
     padding: 24px;
   }
@@ -274,6 +448,15 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
+  }
+
+  .budget-form-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cancel-budget-btn {
+    width: 100%;
   }
 
   .budget-money-info {

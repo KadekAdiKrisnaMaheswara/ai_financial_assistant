@@ -300,25 +300,28 @@ export default function Analytics() {
               )}
             </div>
 
-            <div className="allocation-list">
-              {categoryAllocation.map((item) => {
-                const percentage =
-                  totalExpense > 0
-                    ? Math.round((item.value / totalExpense) * 100)
-                    : 0
+<div className="allocation-list">
+  {categoryAllocation.map((item) => {
+    const rawPercentage =
+      totalExpense > 0 ? (item.value / totalExpense) * 100 : 0
 
-                return (
-                  <div className="allocation-item" key={item.name}>
-                    <span>
-                      <i style={{ background: item.color }}></i>
-                      {item.name}
-                    </span>
+    const percentage = Math.round(rawPercentage)
 
-                    <strong>{percentage}%</strong>
-                  </div>
-                )
-              })}
-            </div>
+    const displayPercentage =
+      rawPercentage > 0 && rawPercentage < 1 ? '<1%' : `${percentage}%`
+
+    return (
+      <div className="allocation-item" key={item.name}>
+        <span>
+          <i style={{ background: item.color }}></i>
+          {item.name}
+        </span>
+
+        <strong>{displayPercentage}</strong>
+      </div>
+    )
+  })}
+</div>
           </div>
         </div>
 
@@ -348,17 +351,20 @@ export default function Analytics() {
                   </td>
                 </tr>
               ) : (
-                categoryAllocation.map((item) => {
-                  const percentage =
-                    totalExpense > 0
-                      ? Math.round((item.value / totalExpense) * 100)
-                      : 0
+categoryAllocation.map((item) => {
+  const rawPercentage =
+    totalExpense > 0 ? (item.value / totalExpense) * 100 : 0
 
-                  return (
-                    <tr key={item.name}>
-                      <td>{item.name}</td>
-                      <td>Rp {item.value.toLocaleString('id-ID')}</td>
-                      <td>{percentage}%</td>
+  const percentage = Math.round(rawPercentage)
+
+  const displayPercentage =
+    rawPercentage > 0 && rawPercentage < 1 ? '<1%' : `${percentage}%`
+
+  return (
+    <tr key={item.name}>
+      <td>{item.name}</td>
+      <td>Rp {item.value.toLocaleString('id-ID')}</td>
+      <td>{displayPercentage}</td>
                       <td>
                         <span
                           className={
