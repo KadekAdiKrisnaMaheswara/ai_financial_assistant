@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import MainLayout from '../../components/layout/MainLayout'
-import { renderFormattedMessage } from '../../utils/formatChatMessage'
+import { renderFormattedMessage, splitMessageByBubbleBreak } from '../../utils/formatChatMessage'
 import './AIAssistant.css'
 
 function AIAssistant() {
@@ -19,16 +19,28 @@ function AIAssistant() {
 
   const [inputValue, setInputValue] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isBuffering, setIsBuffering] = useState(false)
   const [expandedMessageId, setExpandedMessageId] = useState(null)
 
   const [marketData, setMarketData] = useState(null)
   const [marketLoading, setMarketLoading] = useState(false)
 
   const chatEndRef = useRef(null)
+  const chatBufferRef = useRef([])
+  const chatTimerRef = useRef(null)
+
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, isBuffering, loading])
+
+  useEffect(() => {
+    return () => {
+      if (chatTimerRef.current) {
+        clearTimeout(chatTimerRef.current)
+      }
+    }
+  }, [])
 
   const fetchMarketSnapshot = async () => {
     try {
@@ -59,18 +71,19 @@ function AIAssistant() {
     fetchMarketSnapshot()
   }, [])
 
-  const handleSend = async () => {
-    const trimmed = inputValue.trim()
-    if (!trimmed || loading) return
-
-    const userMessage = {
-      id: Date.now(),
-      role: 'user',
-      text: trimmed,
+  const sendMergedMessages = async () => {
+    if (chatTimerRef.current) {
+      clearTimeout(chatTimerRef.current)
+      chatTimerRef.current = null
     }
 
-    setMessages((prev) => [...prev, userMessage])
-    setInputValue('')
+    const messagesToCombine = [...chatBufferRef.current]
+    chatBufferRef.current = []
+    setIsBuffering(false)
+
+    if (messagesToCombine.length === 0) return
+
+    const combinedText = messagesToCombine.join('\n')
     setLoading(true)
 
     try {
@@ -87,7 +100,7 @@ function AIAssistant() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: trimmed,
+          message: combinedText,
           user_id: user.id,
         }),
       })
@@ -97,16 +110,23 @@ function AIAssistant() {
       }
 
       const data = await response.json()
+      const rawResponse = data.response || 'Maaf, saya tidak dapat memproses pertanyaan Anda.'
+      const parts = splitMessageByBubbleBreak(rawResponse)
 
-      const aiMessage = {
-        id: Date.now() + 1,
-        role: 'assistant',
-        text:
-          data.response ||
-          'Maaf, saya tidak dapat memproses pertanyaan Anda.',
+      for (let i = 0; i < parts.length; i++) {
+        if (i > 0) {
+          setLoading(true)
+          await new Promise((resolve) => setTimeout(resolve, 800))
+        }
+
+        const aiMessage = {
+          id: Date.now() + 1 + i,
+          role: 'assistant',
+          text: parts[i],
+        }
+
+        setMessages((prev) => [...prev, aiMessage])
       }
-
-      setMessages((prev) => [...prev, aiMessage])
     } catch (error) {
       console.error('Error:', error)
 
@@ -122,6 +142,35 @@ function AIAssistant() {
       ])
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSend = async () => {
+    const trimmed = inputValue.trim()
+    if (!trimmed || loading) return
+
+    const userMessage = {
+      id: Date.now(),
+      role: 'user',
+      text: trimmed,
+    }
+
+    setMessages((prev) => [...prev, userMessage])
+    setInputValue('')
+
+    if (chatTimerRef.current) {
+      clearTimeout(chatTimerRef.current)
+    }
+
+    chatBufferRef.current.push(trimmed)
+    setIsBuffering(true)
+
+    if (chatBufferRef.current.length === 4) {
+      sendMergedMessages()
+    } else {
+      chatTimerRef.current = setTimeout(() => {
+        sendMergedMessages()
+      }, 8000)
     }
   }
 
@@ -221,32 +270,60 @@ function AIAssistant() {
             </header>
 
             <div className="chat-messages">
-              {messages.map((message) => (
+              {messages.map((message, index) => {
+                const isPreviousSame = index > 0 && messages[index - 1].role === message.role
+                return (
+                  <div
+                    key={message.id}
+                    className={`chat-bubble ${
+                      message.role === 'user' ? 'user' : 'assistant'
+                    } ${isPreviousSame ? 'consecutive' : ''}`}
+                  >
+                    {!isPreviousSame && (
+                      <div className="bubble-meta">
+                        <span>{message.role === 'user' ? 'Anda' : 'AIVEST'}</span>
+                        <span>
+                          {message.role === 'user' ? 'User' : 'AI Assistant'}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="bubble-content">{renderMessage(message)}</div>
+                  </div>
+                )
+              })}
+
+              {(loading || isBuffering) && (
                 <div
-                  key={message.id}
-                  className={`chat-bubble ${
-                    message.role === 'user' ? 'user' : 'assistant'
+                  className={`chat-bubble assistant ${
+                    messages.length > 0 &&
+                    messages[messages.length - 1].role === 'assistant'
+                      ? 'consecutive'
+                      : ''
                   }`}
                 >
-                  <div className="bubble-meta">
-                    <span>{message.role === 'user' ? 'Anda' : 'AIVEST'}</span>
-                    <span>
-                      {message.role === 'user' ? 'User' : 'AI Assistant'}
-                    </span>
+                  {!(
+                    messages.length > 0 &&
+                    messages[messages.length - 1].role === 'assistant'
+                  ) && (
+                    <div className="bubble-meta">
+                      <span>AIVEST</span>
+                      <span>AI Assistant</span>
+                    </div>
+                  )}
+
+                  <div className="loading-container">
+                    {isBuffering && (
+                      <span className="buffering-text">
+                        AIVEST sedang menunggu pesan tambahan...
+                      </span>
+                    )}
+                    <div className="loading-dots">
+                      <span className="dot"></span>
+                      <span className="dot"></span>
+                      <span className="dot"></span>
+                    </div>
                   </div>
-
-                  <div className="bubble-content">{renderMessage(message)}</div>
-                </div>
-              ))}
-
-              {loading && (
-                <div className="chat-bubble assistant">
-                  <div className="bubble-meta">
-                    <span>AIVEST</span>
-                    <span>AI Assistant</span>
-                  </div>
-
-                  <div className="loading-dots">Sedang memproses...</div>
                 </div>
               )}
 

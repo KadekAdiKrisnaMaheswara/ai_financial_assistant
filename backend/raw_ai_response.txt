@@ -1,0 +1,39 @@
+=== RAW API RESPONSE ===
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Melihat data indeks saham terkini, IHSG (IDX Composite) saat ini menunjukkan pergerakan negatif. Hari ini indeks turun sebesar 1.72% ke level 5.896,13.\n[BUBBLE_BREAK]\nPenurunan ini menandakan pasar saham sedang dalam kondisi yang kurang stabil atau cenderung melemah. Kondisi seperti ini seringkali dipicu oleh berbagai sentimen ekonomi.\n[BUBBLE_BREAK]\nJadi, jika kamu berencana investasi saham dalam waktu dekat, ada baiknya untuk berhati-hati atau mempertimbangkan instrumen investasi lain. Kamu bisa juga memantau pergerakan pasar untuk beberapa hari ke depan, Budi."
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 2509,
+    "candidatesTokenCount": 143,
+    "totalTokenCount": 3252,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 2509
+      }
+    ],
+    "thoughtsTokenCount": 600,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "iVBBar_AEPXmjuMP2IWu4QY"
+}
+
+=== EXTRACTED TEXT ===
+Melihat data indeks saham terkini, IHSG (IDX Composite) saat ini menunjukkan pergerakan negatif. Hari ini indeks turun sebesar 1.72% ke level 5.896,13.
+[BUBBLE_BREAK]
+Penurunan ini menandakan pasar saham sedang dalam kondisi yang kurang stabil atau cenderung melemah. Kondisi seperti ini seringkali dipicu oleh berbagai sentimen ekonomi.
+[BUBBLE_BREAK]
+Jadi, jika kamu berencana investasi saham dalam waktu dekat, ada baiknya untuk berhati-hati atau mempertimbangkan instrumen investasi lain. Kamu bisa juga memantau pergerakan pasar untuk beberapa hari ke depan, Budi.

@@ -37,23 +37,6 @@ export const renderFormattedMessage = (text) => {
 export const enhanceMessageReadability = (text) => {
   if (!text) return text;
 
-  // Pattern recognition for common financial AI response structures
-  let enhanced = text;
-
-  // Enhance common starting phrases with subtle visual cue
-  const startPhrases = [
-    'Berdasarkan data',
-    'Melihat',
-    'Total',
-    'Rekomendasi',
-    'Saran',
-    'Dengan',
-    'Kategori',
-    'Selamat',
-    'Fokus',
-    'Pastikan',
-  ];
-
   // Split into paragraphs and process
   const paragraphs = text.split(/\n\n+/).filter(p => p.trim() !== '');
 
@@ -81,3 +64,17 @@ export const truncateIfNeeded = (text, maxLines = 15) => {
     moreCount: 0,
   };
 };
+
+/**
+ * Splits message text by [BUBBLE_BREAK] marker to support multiple chat bubbles.
+ * Also cleans up any empty/whitespace-only parts.
+ */
+export const splitMessageByBubbleBreak = (text) => {
+  if (!text) return [];
+  
+  return text
+    .split(/\[BUBBLE_BREAK\]/i)
+    .map(part => part.trim())
+    .filter(part => part.length > 0);
+};
+

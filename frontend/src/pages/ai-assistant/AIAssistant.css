@@ -453,3 +453,61 @@
     max-width: 100%;
   }
 }
+
+/* CONSECUTIVE BUBBLES AND TYPING DOTS */
+.chat-bubble.consecutive {
+  margin-top: -10px; /* Overrides the parent flex container gap of 18px */
+}
+
+.chat-bubble.assistant.consecutive {
+  border-top-left-radius: 6px;
+}
+
+.chat-bubble.user.consecutive {
+  border-top-right-radius: 6px;
+}
+
+.loading-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 4px;
+}
+
+.loading-dots .dot {
+  width: 8px;
+  height: 8px;
+  background-color: #64748b;
+  border-radius: 50%;
+  display: inline-block;
+  animation: loading-bounce 1.4s infinite ease-in-out both;
+}
+
+.loading-dots .dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots .dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes loading-bounce {
+  0%, 80%, 100% { 
+    transform: scale(0);
+  } 40% { 
+    transform: scale(1.0);
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.buffering-text {
+  font-size: 13px;
+  color: #4b5563;
+  font-weight: 500;
+  display: block;
+}

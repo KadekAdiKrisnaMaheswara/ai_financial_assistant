@@ -29,7 +29,7 @@ const formatPercent = (value) => {
   return `${Number(value).toFixed(2)}%`
 }
 
-const fetchIDXQuote = async (symbol) => {
+export const fetchIDXQuote = async (symbol) => {
   try {
     const quote = await yahooFinance.quote(symbol)
     const isIndex = symbol.startsWith('^')
@@ -63,6 +63,7 @@ const fetchIDXQuote = async (symbol) => {
   }
 }
 
+/*
 const fetchGoldIDR = async () => {
   try {
     const [goldQuote, usdIdrQuote] = await Promise.all([
@@ -114,18 +115,83 @@ const fetchGoldIDR = async () => {
     }
   }
 }
+*/
+
+export const fetchGoldIDR = async () => {
+  try {
+    const goldApiUrl = 'https://logam-mulia-api.iamutaki.workers.dev/api/prices/pegadaian/history'
+    const response = await fetch(goldApiUrl)
+    const result = await response.json()
+
+    if (!result.success || !result.data || result.data.length === 0) {
+      throw new Error('Data emas tidak tersedia')
+    }
+
+    const nonZeroData = result.data.filter(
+      (item) => item.sellPrice > 0 && item.buybackPrice > 0
+    )
+    if (nonZeroData.length === 0) {
+      throw new Error('Tidak ada data harga emas valid (non-zero) dari Pegadaian')
+    }
+
+    const latest = nonZeroData[0]
+    const priceGram = latest.sellPrice / latest.weight
+    const buybackPriceGram = latest.buybackPrice / latest.weight
+
+    const prev = nonZeroData[1]
+    let change = null
+    let changePercent = null
+    if (prev) {
+      const prevPriceGram = prev.sellPrice / prev.weight
+      change = priceGram - prevPriceGram
+      changePercent = (change / prevPriceGram) * 100
+    }
+
+    return {
+      symbol: 'PEGADAIAN.GOLD',
+      name: 'Emas Pegadaian',
+      price: priceGram,
+      priceGram: priceGram,
+      buybackPrice: buybackPriceGram,
+      change,
+      changePercent,
+      formattedPrice: formatIDR(priceGram),
+      formattedPriceGram: formatIDR(priceGram),
+      formattedBuybackPrice: formatIDR(buybackPriceGram),
+      formattedChangePercent: formatPercent(changePercent),
+      currency: 'IDR',
+      status: 'ok',
+      note: `Harga emas Pegadaian per gram berdasarkan data tanggal ${latest.recordedDate}`,
+    }
+  } catch (error) {
+    return {
+      symbol: 'PEGADAIAN.GOLD',
+      name: 'Emas Pegadaian',
+      price: null,
+      priceGram: null,
+      change: null,
+      changePercent: null,
+      formattedPrice: '-',
+      formattedPriceGram: '-',
+      formattedChangePercent: '-',
+      currency: 'IDR',
+      status: 'error',
+      message: error.message,
+    }
+  }
+}
+
+export const stockSymbols = [
+  '^JKSE',
+  'BBCA.JK',
+  'BBRI.JK',
+  'BMRI.JK',
+  'TLKM.JK',
+  'ASII.JK',
+]
 
 router.get('/snapshot', authMiddleware, async (req, res) => {
   try {
-    const stockSymbols = [
-      '^JKSE',
-      'BBCA.JK',
-      'BBRI.JK',
-      'BMRI.JK',
-      'TLKM.JK',
-      'ASII.JK',
-    ]
-
     const [gold, ...stocks] = await Promise.all([
       fetchGoldIDR(),
       ...stockSymbols.map((symbol) => fetchIDXQuote(symbol)),

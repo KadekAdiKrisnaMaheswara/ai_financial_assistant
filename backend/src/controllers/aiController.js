@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import prisma from '../prisma/client.js';
+import { stockSymbols, fetchIDXQuote } from '../routes/marketRoutes.js';
 
 // --- FUNGSI HELPER: Mengambil Data Emas Terkini ---
 const fetchGoldPrices = async () => {
@@ -9,17 +10,24 @@ const fetchGoldPrices = async () => {
     const response = await fetch(goldApiUrl);
     const result = await response.json();
 
-    if (!result.success) {      
+    if (!result.success || !result.data) {
       return null;
     }
-    
-    console.log('Data emas berhasil diambil:', result.data);
+
+    const nonZeroData = result.data.filter(item => item.sellPrice > 0 && item.buybackPrice > 0).slice(0, 7);
+    if (nonZeroData.length === 0) {
+      return null;
+    }
+
+    console.log('Data emas berhasil diambil (non-zero):', nonZeroData);
     let goldContext = "Data Harga Emas Pegadaian 7 Hari Terakhir (per gram):\n";
-    
-    result.data.forEach((item) => {
-      goldContext += `Tanggal ${item.recordedDate}: Harga Beli Rp${item.sellPrice}, Harga Jual Kembali Rp${item.buybackPrice}\n`;
+
+    nonZeroData.forEach((item) => {
+      const sellPriceGram = item.sellPrice / item.weight;
+      const buybackPriceGram = item.buybackPrice / item.weight;
+      goldContext += `Tanggal ${item.recordedDate}: Harga Beli Rp ${sellPriceGram.toLocaleString('id-ID')}/gram, Harga Jual Kembali Rp ${buybackPriceGram.toLocaleString('id-ID')}/gram\n`;
     });
-    
+
     return goldContext;
   } catch (error) {
     console.error('Gagal mengambil data emas:', error);
@@ -139,7 +147,7 @@ export const generateResponse = async (req, res) => {
     }
 
     // 1. Membaca file prompt.md (System Instructions dengan RAG context)
-    const promptPath = path.join(process.cwd(), 'prompt.md'); 
+    const promptPath = path.join(process.cwd(), 'prompt.md');
     let systemInstructions = '';
     try {
       systemInstructions = fs.readFileSync(promptPath, 'utf8');
@@ -151,36 +159,68 @@ export const generateResponse = async (req, res) => {
     // 2. Ambil Data Keuangan Pelanggan (RAG - Retrieval-Augmented Generation)
     console.log('Mengambil data keuangan pelanggan untuk RAG...');
     const customerFinancialData = await fetchCustomerFinancialData(user_id);
-    
+
     // Ganti placeholder dengan data customer sebenarnya
     systemInstructions = systemInstructions.replace(
       '[USER_FINANCIAL_DATA_WILL_BE_INJECTED_HERE]',
       customerFinancialData
     );
 
-    // 3. Deteksi Kata Kunci Emas & Injeksi Data Real-Time
-    let goldDataInjection = '';
+    // 3. Deteksi Kata Kunci Investasi (Emas & Saham) & Injeksi Data Real-Time
+    let investmentDataInjection = '';
     const userMessageLower = message.toLowerCase();
-    
-    if (userMessageLower.includes('emas') || userMessageLower.includes('logam mulia') || 
-        userMessageLower.includes('investasi') || userMessageLower.includes('membeli') ||
-        userMessageLower.includes('jual')) {
-      console.log('Keyword investasi/emas terdeteksi, menarik data Logam Mulia API...');
-      const goldDataText = await fetchGoldPrices();
-      
+
+    const isGoldMentioned =
+      userMessageLower.includes('emas') ||
+      userMessageLower.includes('logam mulia');
+
+    const isStockMentioned =
+      userMessageLower.includes('saham') ||
+      userMessageLower.includes('stock') ||
+      userMessageLower.includes('ihsg') ||
+      userMessageLower.includes('jkse') ||
+      stockSymbols.some(symbol => userMessageLower.includes(symbol.toLowerCase().replace('.jk', '')));
+
+    const isGeneralInvestment =
+      userMessageLower.includes('investasi') ||
+      userMessageLower.includes('membeli') ||
+      userMessageLower.includes('jual');
+
+    if (isGoldMentioned || isStockMentioned || isGeneralInvestment) {
+      console.log('Keyword investasi terdeteksi, menarik data pasar...');
+
+      const [goldDataText, stocksQuotes] = await Promise.all([
+        fetchGoldPrices(),
+        Promise.all(stockSymbols.map(symbol => fetchIDXQuote(symbol)))
+      ]);
+
+      let contextParts = [];
+
       if (goldDataText) {
-        goldDataInjection = `\n\n[DATA REAL-TIME HARGA EMAS]\n${goldDataText}\n\nBerdasarkan tren harga ini dan data finansial pengguna, analisis dan berikan rekomendasi apakah saat ini adalah waktu yang tepat untuk membeli emas atau tidak.`;
-        systemInstructions += goldDataInjection;
+        contextParts.push(`[DATA REAL-TIME HARGA EMAS]\n${goldDataText}`);
       } else {
-        systemInstructions += `\n\n[DATA EMAS] Data emas terkini tidak tersedia saat ini. Jelaskan bahwa Anda tidak dapat memberikan rekomendasi investasi emas tanpa data harga terkini.`;
+        contextParts.push(`[DATA EMAS]\nData emas terkini tidak tersedia saat ini.`);
       }
+
+      let stocksContext = "Data Harga Saham/Indeks Terkini:\n";
+      stocksQuotes.forEach((stock) => {
+        if (stock.status === 'ok') {
+          stocksContext += `- ${stock.name} (${stock.symbol}): Harga ${stock.formattedPrice}, Perubahan ${stock.formattedChangePercent}\n`;
+        } else {
+          stocksContext += `- ${stock.symbol}: Gagal mengambil data (${stock.message})\n`;
+        }
+      });
+      contextParts.push(`[DATA REAL-TIME INDEKS & SAHAM]\n${stocksContext}`);
+
+      investmentDataInjection = `\n\n${contextParts.join('\n\n')}\n\nBerdasarkan data harga emas dan saham/indeks di atas serta data finansial pengguna, analisis dan berikan rekomendasi investasi yang paling tepat (apakah membeli emas, membeli saham tertentu, atau menabung saja). Jika data tertentu tidak tersedia atau gagal diambil, sebutkan bahwa Anda tidak memiliki akses ke harga real-time data tersebut.`;
+      systemInstructions += investmentDataInjection;
     }
 
     // 4. Tambahkan reminder strict untuk non-financial topics
     systemInstructions += `\n\n[REMINDER KETAT]\nJika pertanyaan user SAMA SEKALI TIDAK TERKAIT dengan: analisis data keuangannya, manajemen pengeluaran, perencanaan budget, tabungan, atau investasi emas - TOLAK pertanyaan tersebut dengan sopan dan arahkan kembali ke topik finansial.`;
 
     // 5. Konfigurasi dan Pemanggilan Gemini API
-    const modelName = 'gemini-3.5-flash'; 
+    const modelName = 'gemini-2.5-flash';
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
     const response = await fetch(apiUrl, {
@@ -209,6 +249,17 @@ export const generateResponse = async (req, res) => {
     });
 
     const data = await response.json();
+
+    // Simpan respons mentah AI ke file txt
+    try {
+      const logPath = path.join(process.cwd(), 'raw_ai_response.txt');
+      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Tidak ada respons/Error';
+      const rawLogContent = `=== RAW API RESPONSE ===\n${JSON.stringify(data, null, 2)}\n\n=== EXTRACTED TEXT ===\n${generatedText}\n`;
+      fs.writeFileSync(logPath, rawLogContent, 'utf8');
+      console.log('Respons mentah AI/Error berhasil disimpan ke raw_ai_response.txt');
+    } catch (writeErr) {
+      console.error('Gagal menulis file log respons AI:', writeErr);
+    }
 
     if (!response.ok) {
       console.error('Gemini API Error:', data);
