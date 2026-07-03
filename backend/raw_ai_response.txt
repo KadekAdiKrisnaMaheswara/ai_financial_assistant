@@ -5,7 +5,7 @@
       "content": {
         "parts": [
           {
-            "text": "Melihat data indeks saham terkini, IHSG (IDX Composite) saat ini menunjukkan pergerakan negatif. Hari ini indeks turun sebesar 1.72% ke level 5.896,13.\n[BUBBLE_BREAK]\nPenurunan ini menandakan pasar saham sedang dalam kondisi yang kurang stabil atau cenderung melemah. Kondisi seperti ini seringkali dipicu oleh berbagai sentimen ekonomi.\n[BUBBLE_BREAK]\nJadi, jika kamu berencana investasi saham dalam waktu dekat, ada baiknya untuk berhati-hati atau mempertimbangkan instrumen investasi lain. Kamu bisa juga memantau pergerakan pasar untuk beberapa hari ke depan, Budi."
+            "text": "Budi, dengan sisa dana Rp 8.950.000 yang kamu miliki, banyak sekali pilihan investasi yang cocok. Saya rekomendasikan alokasikan sebagian dari dana ini untuk mulai berinvestasi.\n[BUBBLE_BREAK]\nHarga emas dalam beberapa hari terakhir menunjukkan tren kenaikan yang stabil, jadi ini bisa jadi waktu yang baik untuk membeli. Sementara itu, pasar saham hari ini sedang sangat positif, dengan IDX Composite naik 2.28% dan banyak saham utama juga menguat.\n[BUBBLE_BREAK]\nUntuk awal, emas bisa jadi pilihan yang lebih aman dan mudah. Jika kamu tertarik dengan potensi return lebih tinggi, saham blue-chip seperti BBCA atau ASII bisa dipertimbangkan, tapi ingat ada risiko pasar ya."
           }
         ],
         "role": "model"
@@ -15,25 +15,25 @@
     }
   ],
   "usageMetadata": {
-    "promptTokenCount": 2509,
-    "candidatesTokenCount": 143,
-    "totalTokenCount": 3252,
+    "promptTokenCount": 2693,
+    "candidatesTokenCount": 161,
+    "totalTokenCount": 4565,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
-        "tokenCount": 2509
+        "tokenCount": 2693
       }
     ],
-    "thoughtsTokenCount": 600,
+    "thoughtsTokenCount": 1711,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "iVBBar_AEPXmjuMP2IWu4QY"
+  "responseId": "srhHapG7OebL4-EP4PLVsQE"
 }
 
 === EXTRACTED TEXT ===
-Melihat data indeks saham terkini, IHSG (IDX Composite) saat ini menunjukkan pergerakan negatif. Hari ini indeks turun sebesar 1.72% ke level 5.896,13.
+Budi, dengan sisa dana Rp 8.950.000 yang kamu miliki, banyak sekali pilihan investasi yang cocok. Saya rekomendasikan alokasikan sebagian dari dana ini untuk mulai berinvestasi.
 [BUBBLE_BREAK]
-Penurunan ini menandakan pasar saham sedang dalam kondisi yang kurang stabil atau cenderung melemah. Kondisi seperti ini seringkali dipicu oleh berbagai sentimen ekonomi.
+Harga emas dalam beberapa hari terakhir menunjukkan tren kenaikan yang stabil, jadi ini bisa jadi waktu yang baik untuk membeli. Sementara itu, pasar saham hari ini sedang sangat positif, dengan IDX Composite naik 2.28% dan banyak saham utama juga menguat.
 [BUBBLE_BREAK]
-Jadi, jika kamu berencana investasi saham dalam waktu dekat, ada baiknya untuk berhati-hati atau mempertimbangkan instrumen investasi lain. Kamu bisa juga memantau pergerakan pasar untuk beberapa hari ke depan, Budi.
+Untuk awal, emas bisa jadi pilihan yang lebih aman dan mudah. Jika kamu tertarik dengan potensi return lebih tinggi, saham blue-chip seperti BBCA atau ASII bisa dipertimbangkan, tapi ingat ada risiko pasar ya.

@@ -131,7 +131,8 @@ const fetchCustomerFinancialData = async (userId) => {
 
 export const generateResponse = async (req, res) => {
   try {
-    const { message, user_id } = req.body;
+    const { message, sessionId } = req.body;
+    const user_id = req.userId || req.body.user_id;
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
@@ -219,7 +220,72 @@ export const generateResponse = async (req, res) => {
     // 4. Tambahkan reminder strict untuk non-financial topics
     systemInstructions += `\n\n[REMINDER KETAT]\nJika pertanyaan user SAMA SEKALI TIDAK TERKAIT dengan: analisis data keuangannya, manajemen pengeluaran, perencanaan budget, tabungan, atau investasi emas - TOLAK pertanyaan tersebut dengan sopan dan arahkan kembali ke topik finansial.`;
 
-    // 5. Konfigurasi dan Pemanggilan Gemini API
+    // 5. Hubungkan / Dapatkan Sesi Chat Aktif User
+    let finalSessionId = sessionId;
+    if (!finalSessionId && user_id) {
+      let session = await prisma.chatSession.findFirst({
+        where: { user_id },
+        orderBy: { created_at: 'desc' }
+      });
+      if (!session) {
+        session = await prisma.chatSession.create({
+          data: {
+            user_id,
+            title: 'Sesi Asisten Keuangan'
+          }
+        });
+      }
+      finalSessionId = session.id;
+    }
+
+    // 6. Simpan pesan User ke Database
+    if (finalSessionId) {
+      await prisma.chatMessage.create({
+        data: {
+          session_id: finalSessionId,
+          role: 'user',
+          content: message
+        }
+      });
+    }
+
+    // 7. Ambil riwayat chat lengkap untuk dikirimkan ke Gemini API sebagai context history
+    let historyContents = [];
+    if (finalSessionId) {
+      const chatMessages = await prisma.chatMessage.findMany({
+        where: { session_id: finalSessionId },
+        orderBy: { created_at: 'asc' }
+      });
+
+      // Filter dan format untuk Gemini (bergantian user-model, harus diawali dengan user)
+      const firstUserIdx = chatMessages.findIndex(m => m.role === 'user');
+      if (firstUserIdx !== -1) {
+        const filtered = chatMessages.slice(firstUserIdx);
+        for (const msg of filtered) {
+          const role = msg.role === 'assistant' ? 'model' : 'user';
+          if (historyContents.length > 0 && historyContents[historyContents.length - 1].role === role) {
+            historyContents[historyContents.length - 1].parts[0].text += '\n\n' + msg.content;
+          } else {
+            historyContents.push({
+              role,
+              parts: [{ text: msg.content }]
+            });
+          }
+        }
+      }
+    }
+
+    // Fallback jika history kosong
+    if (historyContents.length === 0) {
+      historyContents = [
+        {
+          role: 'user',
+          parts: [{ text: message }]
+        }
+      ];
+    }
+
+    // 8. Konfigurasi dan Pemanggilan Gemini API dengan history
     const modelName = 'gemini-2.5-flash';
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
@@ -236,15 +302,7 @@ export const generateResponse = async (req, res) => {
             },
           ],
         },
-        contents: [
-          {
-            parts: [
-              {
-                text: message,
-              },
-            ],
-          },
-        ],
+        contents: historyContents,
       }),
     });
 
@@ -268,6 +326,17 @@ export const generateResponse = async (req, res) => {
     }
 
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Tidak ada respons';
+
+    // 9. Simpan pesan AI (assistant) ke Database
+    if (finalSessionId && generatedText) {
+      await prisma.chatMessage.create({
+        data: {
+          session_id: finalSessionId,
+          role: 'assistant',
+          content: generatedText
+        }
+      });
+    }
 
     res.json({ response: generatedText });
   } catch (error) {

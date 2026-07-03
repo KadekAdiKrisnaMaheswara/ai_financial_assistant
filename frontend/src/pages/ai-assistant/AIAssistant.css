@@ -37,7 +37,7 @@
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
   display: flex;
   flex-direction: column;
-  min-height: 72vh;
+  height: 114vh;
   overflow: hidden;
 }
 
@@ -80,6 +80,23 @@
   flex-direction: column;
   gap: 18px;
   background: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .chat-bubble {
@@ -231,6 +248,26 @@
   flex-direction: column;
   gap: 12px;
   margin-top: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.quick-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.quick-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quick-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.quick-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .quick-list button {
@@ -354,6 +391,26 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.market-stock-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.market-stock-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.market-stock-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.market-stock-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .market-stock-item {
@@ -456,7 +513,8 @@
 
 /* CONSECUTIVE BUBBLES AND TYPING DOTS */
 .chat-bubble.consecutive {
-  margin-top: -10px; /* Overrides the parent flex container gap of 18px */
+  margin-top: -10px;
+  /* Overrides the parent flex container gap of 18px */
 }
 
 .chat-bubble.assistant.consecutive {
@@ -492,9 +550,14 @@
 }
 
 @keyframes loading-bounce {
-  0%, 80%, 100% { 
+
+  0%,
+  80%,
+  100% {
     transform: scale(0);
-  } 40% { 
+  }
+
+  40% {
     transform: scale(1.0);
   }
 }
@@ -510,4 +573,4 @@
   color: #4b5563;
   font-weight: 500;
   display: block;
-}
+}

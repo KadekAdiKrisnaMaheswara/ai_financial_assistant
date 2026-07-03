@@ -18,12 +18,26 @@ function Sidebar() {
   const SettingsIcon = ICONS.settings
   const LogoutIcon = ICONS.logout
 
-const handleLogout = () => {
+const handleLogout = async () => {
   const confirmLogout = window.confirm(
     'Are you sure you want to logout from AIVEST?'
   )
 
   if (!confirmLogout) return
+
+  try {
+    const token = localStorage.getItem('token')
+    if (token) {
+      await fetch('http://localhost:5000/api/ai/chat-session/active', {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+    }
+  } catch (error) {
+    console.error('Gagal menghapus sesi chat saat logout:', error)
+  }
 
   localStorage.removeItem('token')
   localStorage.removeItem('user')

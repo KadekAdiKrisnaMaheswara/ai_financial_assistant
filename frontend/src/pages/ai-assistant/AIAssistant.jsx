@@ -17,6 +17,7 @@ function AIAssistant() {
     },
   ])
 
+  const [activeSessionId, setActiveSessionId] = useState(null)
   const [inputValue, setInputValue] = useState('')
   const [loading, setLoading] = useState(false)
   const [isBuffering, setIsBuffering] = useState(false)
@@ -41,6 +42,52 @@ function AIAssistant() {
       }
     }
   }, [])
+
+  const fetchActiveSession = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) return
+
+      const response = await fetch('http://localhost:5000/api/ai/chat-session/active', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setActiveSessionId(data.id)
+
+        if (data.messages && data.messages.length > 0) {
+          const formattedMessages = []
+          for (const m of data.messages) {
+            if (m.role === 'assistant') {
+              const parts = splitMessageByBubbleBreak(m.content)
+              parts.forEach((part, index) => {
+                formattedMessages.push({
+                  id: `${m.id}-${index}`,
+                  role: 'assistant',
+                  text: part
+                })
+              })
+            } else {
+              const parts = m.content.split('\n')
+              parts.forEach((part, index) => {
+                formattedMessages.push({
+                  id: `${m.id}-${index}`,
+                  role: m.role,
+                  text: part
+                })
+              })
+            }
+          }
+          setMessages(formattedMessages)
+        }
+      }
+    } catch (error) {
+      console.error('Gagal mengambil sesi chat aktif:', error)
+    }
+  }
 
   const fetchMarketSnapshot = async () => {
     try {
@@ -68,6 +115,7 @@ function AIAssistant() {
   }
 
   useEffect(() => {
+    fetchActiveSession()
     fetchMarketSnapshot()
   }, [])
 
@@ -87,6 +135,7 @@ function AIAssistant() {
     setLoading(true)
 
     try {
+      const token = localStorage.getItem('token')
       const storedUser = localStorage.getItem('user')
       const user = storedUser ? JSON.parse(storedUser) : null
 
@@ -98,10 +147,11 @@ function AIAssistant() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           message: combinedText,
-          user_id: user.id,
+          sessionId: activeSessionId
         }),
       })
 
@@ -135,9 +185,8 @@ function AIAssistant() {
         {
           id: Date.now() + 1,
           role: 'assistant',
-          text: `Maaf, terjadi kesalahan: ${
-            error.message || 'Silakan coba lagi nanti.'
-          }`,
+          text: `Maaf, terjadi kesalahan: ${error.message || 'Silakan coba lagi nanti.'
+            }`,
         },
       ])
     } finally {
@@ -186,9 +235,6 @@ function AIAssistant() {
     'Rekomendasi tujuan tabungan terbaik',
     'Analisa pengeluaran saya bulan ini',
     'Tips invest jangka pendek',
-  ]
-
-  const marketPrompts = [
     'Apa arti pergerakan IHSG hari ini?',
     'Bagaimana kondisi saham bank besar Indonesia?',
     'Apakah harga emas sedang menarik untuk dipantau?',
@@ -275,9 +321,8 @@ function AIAssistant() {
                 return (
                   <div
                     key={message.id}
-                    className={`chat-bubble ${
-                      message.role === 'user' ? 'user' : 'assistant'
-                    } ${isPreviousSame ? 'consecutive' : ''}`}
+                    className={`chat-bubble ${message.role === 'user' ? 'user' : 'assistant'
+                      } ${isPreviousSame ? 'consecutive' : ''}`}
                   >
                     {!isPreviousSame && (
                       <div className="bubble-meta">
@@ -295,22 +340,21 @@ function AIAssistant() {
 
               {(loading || isBuffering) && (
                 <div
-                  className={`chat-bubble assistant ${
-                    messages.length > 0 &&
-                    messages[messages.length - 1].role === 'assistant'
+                  className={`chat-bubble assistant ${messages.length > 0 &&
+                      messages[messages.length - 1].role === 'assistant'
                       ? 'consecutive'
                       : ''
-                  }`}
+                    }`}
                 >
                   {!(
                     messages.length > 0 &&
                     messages[messages.length - 1].role === 'assistant'
                   ) && (
-                    <div className="bubble-meta">
-                      <span>AIVEST</span>
-                      <span>AI Assistant</span>
-                    </div>
-                  )}
+                      <div className="bubble-meta">
+                        <span>AIVEST</span>
+                        <span>AI Assistant</span>
+                      </div>
+                    )}
 
                   <div className="loading-container">
                     {isBuffering && (
@@ -439,27 +483,6 @@ function AIAssistant() {
               </p>
             </div>
 
-            <div className="ai-quick-card">
-              <h3>Market prompt</h3>
-
-              <div className="quick-list">
-                {marketPrompts.map((prompt) => (
-                  <button
-                    type="button"
-                    key={prompt}
-                    onClick={() => setInputValue(prompt)}
-                    disabled={loading}
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-
-              <p className="ai-note">
-                Data market bersifat informatif dan bukan nasihat investasi
-                resmi.
-              </p>
-            </div>
           </aside>
         </div>
       </div>
