@@ -5,7 +5,7 @@
       "content": {
         "parts": [
           {
-            "text": "Budi, dengan sisa dana Rp 8.950.000 yang kamu miliki, banyak sekali pilihan investasi yang cocok. Saya rekomendasikan alokasikan sebagian dari dana ini untuk mulai berinvestasi.\n[BUBBLE_BREAK]\nHarga emas dalam beberapa hari terakhir menunjukkan tren kenaikan yang stabil, jadi ini bisa jadi waktu yang baik untuk membeli. Sementara itu, pasar saham hari ini sedang sangat positif, dengan IDX Composite naik 2.28% dan banyak saham utama juga menguat.\n[BUBBLE_BREAK]\nUntuk awal, emas bisa jadi pilihan yang lebih aman dan mudah. Jika kamu tertarik dengan potensi return lebih tinggi, saham blue-chip seperti BBCA atau ASII bisa dipertimbangkan, tapi ingat ada risiko pasar ya."
+            "text": "Krisna, dengan budget Rp 2 juta sebulan dan fokus pada FNB, Bensin, serta Social Life, kita bisa susun rencana yang efektif. Pembagian ini akan membantumu mengelola pengeluaran inti dengan lebih teratur.\n[BUBBLE_BREAK]\nSaya sarankan alokasi sekitar 40% untuk FNB, 20% untuk Bensin, dan 25% untuk Social Life. Ini memberikan porsi yang cukup untuk kebutuhan dasar dan kegiatan sosialmu.\n[BUBBLE_BREAK]\nDengan pembagian itu, kamu bisa anggarkan sekitar Rp 800.000 untuk FNB, Rp 400.000 untuk Bensin, dan Rp 500.000 untuk Social Life. Sisa Rp 300.000 bisa banget dialokasikan untuk tabungan atau dana tak terduga lho."
           }
         ],
         "role": "model"
@@ -15,25 +15,25 @@
     }
   ],
   "usageMetadata": {
-    "promptTokenCount": 2693,
-    "candidatesTokenCount": 161,
-    "totalTokenCount": 4565,
+    "promptTokenCount": 2579,
+    "candidatesTokenCount": 192,
+    "totalTokenCount": 3523,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
-        "tokenCount": 2693
+        "tokenCount": 2579
       }
     ],
-    "thoughtsTokenCount": 1711,
+    "thoughtsTokenCount": 752,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "srhHapG7OebL4-EP4PLVsQE"
+  "responseId": "HTpJarzsCqvijuMP8baugQo"
 }
 
 === EXTRACTED TEXT ===
-Budi, dengan sisa dana Rp 8.950.000 yang kamu miliki, banyak sekali pilihan investasi yang cocok. Saya rekomendasikan alokasikan sebagian dari dana ini untuk mulai berinvestasi.
+Krisna, dengan budget Rp 2 juta sebulan dan fokus pada FNB, Bensin, serta Social Life, kita bisa susun rencana yang efektif. Pembagian ini akan membantumu mengelola pengeluaran inti dengan lebih teratur.
 [BUBBLE_BREAK]
-Harga emas dalam beberapa hari terakhir menunjukkan tren kenaikan yang stabil, jadi ini bisa jadi waktu yang baik untuk membeli. Sementara itu, pasar saham hari ini sedang sangat positif, dengan IDX Composite naik 2.28% dan banyak saham utama juga menguat.
+Saya sarankan alokasi sekitar 40% untuk FNB, 20% untuk Bensin, dan 25% untuk Social Life. Ini memberikan porsi yang cukup untuk kebutuhan dasar dan kegiatan sosialmu.
 [BUBBLE_BREAK]
-Untuk awal, emas bisa jadi pilihan yang lebih aman dan mudah. Jika kamu tertarik dengan potensi return lebih tinggi, saham blue-chip seperti BBCA atau ASII bisa dipertimbangkan, tapi ingat ada risiko pasar ya.
+Dengan pembagian itu, kamu bisa anggarkan sekitar Rp 800.000 untuk FNB, Rp 400.000 untuk Bensin, dan Rp 500.000 untuk Social Life. Sisa Rp 300.000 bisa banget dialokasikan untuk tabungan atau dana tak terduga lho.
