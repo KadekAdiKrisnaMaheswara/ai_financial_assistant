@@ -36,19 +36,34 @@ const fetchGoldPrices = async () => {
 };
 
 // --- FUNGSI HELPER: Mengambil Data Keuangan Pelanggan (RAG) ---
-const fetchCustomerFinancialData = async (userId) => {
+const fetchCustomerFinancialData = async (userId, userMessage = '') => {
   try {
     if (!userId) {
       return "Data pelanggan tidak tersedia.";
     }
 
+    const isThisMonthRequested = userMessage.toLowerCase().includes('bulan ini');
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    const transactionWhereClause = {
+      user_id: userId,
+    };
+    if (isThisMonthRequested) {
+      transactionWhereClause.transaction_date = {
+        gte: startOfMonth,
+        lte: endOfMonth,
+      };
+    }
+
     const [user, transactions, budgets, goals] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId } }),
       prisma.transaction.findMany({
-        where: { user_id: userId },
+        where: transactionWhereClause,
         include: { category: true },
         orderBy: { transaction_date: 'desc' },
-        take: 50,
+        ...(isThisMonthRequested ? {} : { take: 50 }),
       }),
       prisma.budget.findMany({
         where: { user_id: userId },
@@ -73,7 +88,11 @@ const fetchCustomerFinancialData = async (userId) => {
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
-    dataContext += `RINGKASAN TRANSAKSI (50 Terakhir):\n`;
+    if (isThisMonthRequested) {
+      dataContext += `RINGKASAN TRANSAKSI BULAN INI:\n`;
+    } else {
+      dataContext += `RINGKASAN TRANSAKSI (50 Terakhir):\n`;
+    }
     dataContext += `Total Pemasukan: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: user.currency }).format(income)}\n`;
     dataContext += `Total Pengeluaran: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: user.currency }).format(expense)}\n`;
     dataContext += `Selisih: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: user.currency }).format(income - expense)}\n\n`;
@@ -87,14 +106,48 @@ const fetchCustomerFinancialData = async (userId) => {
         expenseByCategory[catName] = (expenseByCategory[catName] || 0) + parseFloat(t.amount);
       });
 
-    dataContext += `PENGELUARAN BERDASARKAN KATEGORI:\n`;
-    Object.entries(expenseByCategory)
-      .sort((a, b) => b[1] - a[1])
-      .forEach(([cat, amount]) => {
-        const percentage = ((amount / expense) * 100).toFixed(1);
-        dataContext += `${cat}: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: user.currency }).format(amount)} (${percentage}%)\n`;
-      });
+    if (isThisMonthRequested) {
+      dataContext += `PENGELUARAN BERDASARKAN KATEGORI (BULAN INI):\n`;
+    } else {
+      dataContext += `PENGELUARAN BERDASARKAN KATEGORI:\n`;
+    }
+
+    if (isThisMonthRequested && expense === 0) {
+      dataContext += `Tidak ada pengeluaran pada bulan ini.\n`;
+    } else {
+      Object.entries(expenseByCategory)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([cat, amount]) => {
+          const percentage = ((amount / expense) * 100).toFixed(1);
+          dataContext += `${cat}: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: user.currency }).format(amount)} (${percentage}%)\n`;
+        });
+    }
     dataContext += '\n';
+
+    // Jika kata kunci "bulan ini" terdeteksi, lampirkan detail transaksinya
+    if (isThisMonthRequested) {
+      dataContext += `DAFTAR TRANSAKSI DETAIL BULAN INI:\n`;
+      if (transactions.length === 0) {
+        dataContext += `Tidak ada transaksi tercatat pada bulan ini.\n`;
+      } else {
+        transactions.forEach((t) => {
+          const formattedDate = new Date(t.transaction_date).toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          });
+          const formattedAmount = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: user.currency,
+          }).format(parseFloat(t.amount));
+          const categoryName = t.category?.name || 'Lainnya';
+          const typeLabel = t.type === 'income' ? 'Pemasukan' : 'Pengeluaran';
+          const desc = t.description || t.notes || 'Tanpa deskripsi';
+          dataContext += `- [${formattedDate}] ${typeLabel} | Kategori: ${categoryName} | Jumlah: ${formattedAmount} | Keterangan: ${desc}\n`;
+        });
+      }
+      dataContext += '\n';
+    }
 
     // Status Budget
     if (budgets.length > 0) {
@@ -159,7 +212,7 @@ export const generateResponse = async (req, res) => {
 
     // 2. Ambil Data Keuangan Pelanggan (RAG - Retrieval-Augmented Generation)
     console.log('Mengambil data keuangan pelanggan untuk RAG...');
-    const customerFinancialData = await fetchCustomerFinancialData(user_id);
+    const customerFinancialData = await fetchCustomerFinancialData(user_id, message);
 
     // Ganti placeholder dengan data customer sebenarnya
     systemInstructions = systemInstructions.replace(
